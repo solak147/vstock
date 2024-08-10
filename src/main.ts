@@ -38,14 +38,11 @@ use([
   
 const app = createApp(App);
 
-
-
-const app1 = createApp(App);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  app1.component(key, component)
+  app.component(key, component)
 }
 
-app1.use(router)
+app.use(router)
 .use(pinia)
 .mount('#app')
 

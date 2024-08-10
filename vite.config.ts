@@ -11,7 +11,7 @@ export default defineConfig({
 
   server: {
     // 是否开启 https
-    https: false,
+    // https: false,
     // 端口号
     port: 3000,
     // 监听所有地址

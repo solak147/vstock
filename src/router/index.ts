@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 // import { baseStore } from 'store';
 
 import baseRouters from './modules/base';
@@ -20,6 +20,7 @@ const router = createRouter({
 
 // 导航守卫
 router.beforeEach((to, from, next) => {
+  console.log(from)
   const isAuthenticated = localStorage.getItem('authToken');
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {

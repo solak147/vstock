@@ -21,7 +21,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     VanCol: typeof import('vant/es')['Col']
     VanList: typeof import('vant/es')['List']
-    VanLoading: typeof import('vant/es')['Loading']
     VanPullRefresh: typeof import('vant/es')['PullRefresh']
     VanRow: typeof import('vant/es')['Row']
     Waterfall: typeof import('./src/components/Waterfall.vue')['default']

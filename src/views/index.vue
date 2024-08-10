@@ -22,10 +22,10 @@
     </div>
 </template>
   
-<script lang="ts" setup>
+<script setup>
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
-import { useIndexStore } from '@/store/modules'
+import { useIndexStore } from '@/store/modules/index.js'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
