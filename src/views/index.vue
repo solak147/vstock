@@ -23,7 +23,7 @@
 </template>
   
 <script setup>
-import { ref, onMounted, reactive, nextTick, onUnmounted, provide } from 'vue'
+import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules/index.js'
 
@@ -54,9 +54,33 @@ const downBorderColor = '#6fda1a';
 
 const option = ref(null)
 
-const isshow= ref(false)
+watch(
+	() => indexStore.candles.data,
+	() => {
+        setCandles()
+        setInfo()
+	},
+	{
+		deep: true,
+	}
+)
+
 onMounted(async () => { 
 
+    if(Object.keys(indexStore.candles.data).length === 0 || Object.keys(indexStore.info.data).length === 0){
+        return
+    }
+    
+    setCandles()
+    setInfo()
+})
+
+const setInfo = () => {
+    candles.data.priceUp = (candles.data.closePrice - indexStore.info.data.previousClose).toFixed(2)
+    candles.data.percent =  (candles.data.priceUp / indexStore.info.data.previousClose * 100).toFixed(2)
+}
+
+const setCandles = () => {
     candles.data.list = indexStore.candles.data.data.map(item => [item.open, item.close, item.low, item.high])
     
     let previousVol 
@@ -78,8 +102,6 @@ onMounted(async () => {
 
     candles.data.category = indexStore.candles.data.data.map(item => dateFormate(item.date, 'hhmm'))
     candles.data.closePrice = candles.data.list[candles.data.list.length - 1][1]
-    candles.data.priceUp = (candles.data.closePrice - indexStore.info.data.previousClose).toFixed(2)
-    candles.data.percent =  (candles.data.priceUp / indexStore.info.data.previousClose * 100).toFixed(2)
 
     option.value = {
         backgroundColor: '#131313', 
@@ -266,8 +288,7 @@ onMounted(async () => {
             }
         ],
     }
-
-})
+}
 
 
 //2024-08-02T10:25:00.000+08:00 -> 2024-08-02 09:00:00
