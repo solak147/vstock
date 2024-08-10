@@ -1,16 +1,16 @@
 const Utils = {
 
     /** 深度拷贝对象 */
-    deepClone(target,source) {
-        var copyed_objs = [];//此数组解决了循环引用和相同引用的问题，它存放已经递归到的目标对象
-        function _deepCopy(target){
+    deepClone(target : any, source : any) {
+        var copyed_objs : any = [];//此数组解决了循环引用和相同引用的问题，它存放已经递归到的目标对象
+        function _deepCopy(target : any){
             if((typeof target !== 'object')||!target){return target;}
             for(let i= 0 ;i<copyed_objs.length;i++){
                 if(copyed_objs[i].target === target){
                     return copyed_objs[i].copyTarget;
                 }
             }
-            let obj = {};
+            let obj : any = {};
             if(Array.isArray(target)){
                 obj = [];//处理target是数组的情况
             }
@@ -24,7 +24,7 @@ const Utils = {
         return Object.assign(_deepCopy(target),source);
     },
 
-    objToQueryString(object,source){
+    objToQueryString(object : any, source : any){
         if((typeof object !== 'object')||!object){return ''}
         const obj = Object.assign({},object,source);
         const keys = Object.keys(obj);
@@ -47,11 +47,11 @@ const Utils = {
      * @param {string} name
      * @param {string} url
      */
-    getURLQuery(name,url = location.href) {
+    getURLQuery(name : any ,url = location.href) {
         if(url.indexOf('?')===-1)return name?'':{};
         var query = url.substring(url.indexOf('?')+1);
         var arr = query.split("&");
-        var obj = {};
+        var obj : any = {};
         for (var i=0;i<arr.length;i++) {
             var item 
 
@@ -73,7 +73,7 @@ const Utils = {
     // importScript("/js/swiper.min.js", data => {
     //     after do
     // })
-    importScript(path, success, error) {
+    importScript(path : any, success : any, error : any) {
 
         if (document.querySelector(`script[src="${path}"]`) ) {
             console.log('特定的 <script> 元素已存在');
