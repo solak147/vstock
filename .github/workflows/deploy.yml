@@ -1,62 +1,41 @@
-name: Deploy Nuxt3 App site to Pages by action
+# workflow的名字
+name: deploy
 
+# 當以下事件發生時，觸發
 on:
-  # 在针对 `main` 分支的推送上运行。如果你
-  # 使用 `master` 分支作为默认分支，请将其更改为 `master`
+  # 這邊設定的是：push/pullrequest到main時即觸發
   push:
-    branches: [main]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-  # 允许你从 Actions 选项卡手动运行此工作流程
+  # 有加這行可以手動觸發actions
   workflow_dispatch:
 
-# 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# 只允许同时进行一次部署，跳过正在运行和最新队列之间的运行队列
-# 但是，不要取消正在进行的运行，因为我们希望允许这些生产部署完成
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
+# 觸發內容
 jobs:
-  # 构建工作
+  # 這個workflow有個job叫做build
   build:
+    # 這個job要run在ubuntu上
     runs-on: ubuntu-latest
+
+    # job的步驟要做些什麼咧
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # 1. 專門for node.js的actions，記得依node.js版本更新其後version
+      - uses: actions/checkout@v4
+      # 把vue內容build起來
+      - name: Install & Build # 執行
+        run: |
+          npm install
+          npm run build 
+          
+      # 2. deploy
+      - name: Deploy
+        # 別人的actions拿來借用
+        uses: JamesIves/github-pages-deploy-action@releases/v4
         with:
-          node-version: '20' # 使用适合的 Node.js 版本
-
-      - name: Enable pnpm
-        run: corepack enable
-
-      - name: Install Dependencies
-        run: pnpm install # 或 yarn install，根据你的偏好选择
-
-      - name: Generate Static Site
-        run: pnpm build # 或者其他生成静态站点的命令，具体取决于你的 Nuxt.js 配置 # 或 pnpm docs:build / yarn docs:build / bun run docs:build
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .dist
-
-  # 部署工作
-  deploy:
-    environment: # 部署环境
-      name: github-pages # 部署到 GitHub Pages
-      url: ${{ steps.deployment.outputs.page_url }} # 部署后的 URL
-    needs: build # 郈接到构建工作
-    runs-on: ubuntu-latest # 运行环境
-    name: Deploy # 工作名称
-    steps: # 步骤
-      - name: Deploy to GitHub Pages # 部署到 GitHub Pages
-        id: deployment # 步骤 ID
-        uses: actions/deploy-pages@v4 # 使用的 action
+          token: ${{ secrets.ACCESS_TOKEN }} # Settings > Secret 建立的 ACCESS_TOKEN，推同個 repo 的話可以不需要
+          BRANCH: gh-pages # deploy 到 gh-pages 這個分支
+          FOLDER: dist # build 後的資料夾
