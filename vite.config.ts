@@ -8,7 +8,8 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-
+  base:'./',// 将根路径换成相对路径
+  
   server: {
     // 是否开启 https
     // https: false,
