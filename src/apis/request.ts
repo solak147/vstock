@@ -3,6 +3,7 @@ import axios from 'axios';
 const protocol = window.location.protocol
 const paramObj = getURLParameters()
 const domain = paramObj && paramObj.d ? `${protocol}//${paramObj.d}` : ''
+const apiKey = 'YzY2MTY5OWQtMWQ3OC00OTMzLThiZTYtYzViMDA2ZmIzZTg3IDA1ZjEzNDc3LTMzYjAtNDY0OC1hMjVmLWJjODgzNTBkNTRlZQ=='
 
 // 创建请求实例
 const instance = axios.create({
@@ -12,6 +13,10 @@ const instance = axios.create({
   timeout: 5000,
   // 表示跨域请求时是否需要使用凭证
   withCredentials: false,
+
+  headers: {
+    'X-API-KEY': apiKey
+  },
 });
 
 // 前置拦截器（发起请求之前的拦截）

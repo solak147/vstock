@@ -4,6 +4,7 @@ import path from 'path'
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { VantResolver } from '@vant/auto-import-resolver';
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -38,10 +39,10 @@ export default defineConfig({
   plugins: [
     vue(),
     AutoImport({
-      resolvers: [VantResolver()],
+      resolvers: [VantResolver(),ElementPlusResolver()],
     }),
     Components({
-      resolvers: [VantResolver()],
+      resolvers: [VantResolver(),ElementPlusResolver()],
     }),
   ],
 })

@@ -4,9 +4,11 @@ import { reactive, ref } from 'vue'
 export const useIndexStore = defineStore(
   'index',
   () => {
+    const info = reactive( { data: {} })
     const candles = reactive({ data: {}})
 
     return {
+      info,
       candles
     }
   },

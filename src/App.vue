@@ -35,7 +35,7 @@ onMounted(async () => {
             event: 'subscribe',
             data: {
               channel: 'candles',
-              symbol: '2330',
+              symbol: 'IX0001',
             },
           }),
         );
@@ -48,11 +48,18 @@ onMounted(async () => {
       console.log(data);
     };
   };
+
+  //加權指數
+  indexStore.info.data = await API.Stock.getStockInfo('IX0001')
 })
 
 </script>
 
-<style scoped>
+<style lang='scss'>
+@import '@/assets/style/global.scss';
+</style>
+
+<style lang="scss" scoped>
 .app{
 }
 

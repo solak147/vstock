@@ -1,0 +1,862 @@
+// * {
+//   touch-action: pan-y;
+// }
+
+/* flex布局 */
+.flex {
+  display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+/*
+	*	作用于容器
+	*	flex-direction  决定主轴方向
+	* 	flex-wrap  如果一条轴线排不下，如何换行，产生出 多根交叉轴
+	*	flex-flow  flex-flow属性是flex-direction属性和flex-wrap属性的简写形式，默认值为row nowrap。
+	*	justify-content  主轴上的对齐方式
+	*	align-items  交叉轴的对齐方式
+	* 	align-content  多根交叉轴的对齐方式
+	*/
+
+/* flex-direction属性决定主轴的方向（即项目的排列方向）。 */
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-col-reverse {
+  flex-direction: column-reverse;
+}
+
+/* 默认情况下，项目都排在一条线（又称"轴线"）上。flex-wrap属性定义，如果一条轴线排不下，如何换行。 */
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+/* align-items属性定义项目在交叉轴上如何对齐。 */
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-baseline {
+  align-items: baseline;
+}
+
+.items-stretch {
+  align-items: stretch;
+}
+
+/* align-content属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。 */
+.content-center {
+  align-content: center;
+}
+
+.content-start {
+  align-content: flex-start;
+}
+
+.content-end {
+  align-content: flex-end;
+}
+
+.content-between {
+  align-content: space-between;
+}
+
+.content-around {
+  align-content: space-around;
+}
+
+.content-evenly {
+  align-content: space-evenly;
+}
+
+
+/* justify-content属性定义了项目在主轴上的对齐方式。 */
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.justify-evenly {
+  justify-content: space-evenly;
+}
+
+/*
+ *	作用于容器中的项目上
+ *	order  属性定义项目的排列顺序
+ *	flex-grow  属性定义项目的放大比例
+ *	flex-shrink  属性定义了项目的缩小比例
+ *	flex-basis  属性定义了在分配多余空间之前，项目占据的主轴空间（main size）
+ *	flex  属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto
+ *	align-self  属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性
+ */
+
+/* 属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性 */
+.self-auto {
+  align-self: auto;
+}
+
+.self-start {
+  align-self: flex-start;
+}
+
+.self-end {
+  align-self: flex-end;
+}
+
+.self-center {
+  align-self: center;
+}
+
+.self-stretch {
+  align-self: stretch;
+}
+
+/* 属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto */
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.flex-auto {
+  flex: 1 1 auto;
+}
+
+.flex-initial {
+  flex: 0 1 auto;
+}
+
+.flex-none {
+  flex: none;
+}
+
+/* 定位布局 */
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+/* 盒子模型 */
+.box-border {
+  box-sizing: border-box;
+}
+
+.box-content {
+  box-sizing: content-box;
+}
+
+/* 盒子的宽度长度 */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.w-Equally-4 {
+  width: 25%;
+}
+
+.w-Equally-5 {
+  width: 20%;
+}
+
+.w-Equally-6 {
+  width: 16.66%;
+}
+
+.w-Equally-2 {
+  width: 50%;
+}
+
+.w-Equally-3 {
+  width: 33.33%;
+}
+
+.w-100vw {
+  width: 100vw;
+}
+
+.h-100vh {
+  height: 100vh;
+}
+
+.w-inherit {
+  width: inherit;
+}
+
+.h-inherit {
+  height: inherit;
+}
+
+.top {
+  top: 0;
+}
+
+.right {
+  right: 0;
+}
+
+.bottom {
+  bottom: 0;
+}
+
+.left {
+  left: 0;
+}
+
+.margin-auto {
+  margin: 0 auto;
+}
+
+/* 盒子边框 */
+.rounded {
+  border-radius: 50%;
+}
+
+.bt-1px {
+  border-top: 1px solid #F1F1F1;
+}
+
+.br-1px {
+  border-right: 1px solid #F1F1F1;
+}
+
+.bb-1px {
+  border-bottom: 1px solid #F1F1F1;
+}
+
+.bl-1px {
+  border-left: 1px solid #F1F1F1;
+}
+
+.ba-1px {
+  border: 1px solid #F1F1F1;
+}
+
+/* 文本相关对齐方式 */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+// 字体加粗
+.bolder {
+  font-weight: bolder;
+}
+
+/* 文本溢出 */
+.truncate {
+  overflow     : hidden;
+  text-overflow: ellipsis;
+  white-space  : nowrap;
+}
+
+/* overflow*/
+.scroll-y {
+  overflow-y: scroll;
+}
+
+.scroll-hide {
+  overflow: hidden;
+}
+
+.scroll-x {
+  overflow-x: scroll;
+}
+
+/* 增加点击区域 */
+.extend-via-border {
+  border: 10px solid transparent;
+}
+
+.block {
+  display: block;
+}
+
+.none {
+  display: none;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.inline {
+  display: inline;
+}
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}
+
+// sass变量
+@for $i from 0 through 1024 {
+  .w-#{$i} {
+    width: 1px * $i;
+  }
+
+  .h-#{$i} {
+    height: 1px * $i;
+  }
+
+  .line-#{$i} {
+    line-height: 1px * $i;
+  }
+}
+
+@for $i from 0 through 400 {
+  .z-index-#{$i} {
+    z-index: 1 * $i
+  }
+
+  .top-#{$i} {
+    top: 1px * $i;
+  }
+
+  .top-#{$i}- {
+    top: -1px * $i;
+  }
+
+  .right-#{$i} {
+    right: 1px * $i;
+  }
+
+  .right-#{$i}- {
+    right: -1px * $i;
+  }
+
+  .bottom-#{$i} {
+    bottom: 1px * $i;
+  }
+
+  .bottom-#{$i}- {
+    bottom: -1px * $i;
+  }
+
+  .left-#{$i} {
+    left: 1px * $i;
+  }
+
+  .left-#{$i}- {
+    left: -1px * $i;
+  }
+
+  .mx-#{$i} {
+    margin: 0 1px * $i;
+  }
+
+  .my-#{$i} {
+    margin: 1px * $i 0;
+  }
+
+  .mt-#{$i} {
+    margin-top: 1px * $i;
+  }
+
+  .mr-#{$i} {
+    margin-right: 1px * $i;
+  }
+
+  .mb-#{$i} {
+    margin-bottom: 1px * $i;
+  }
+
+  .ml-#{$i} {
+    margin-left: 1px * $i;
+  }
+
+  .px-#{$i} {
+    padding: 0 1px * $i;
+  }
+
+  .py-#{$i} {
+    padding: 1px * $i 0;
+  }
+
+  .pt-#{$i} {
+    padding-top: 1px * $i;
+  }
+
+  .pr-#{$i} {
+    padding-right: 1px * $i;
+  }
+
+  .pb-#{$i} {
+    padding-bottom: 1px * $i;
+  }
+
+  .pl-#{$i} {
+    padding-left: 1px * $i;
+  }
+
+  .m-all-#{$i} {
+    margin: 1px * $i;
+  }
+
+  .p-all-#{$i} {
+    padding: 1px * $i;
+  }
+
+  .rounded-#{$i} {
+    border-radius: 1px * $i !important;
+  }
+
+  .fz-#{$i} {
+    font-size: 1px * $i !important; // px的缘故 px => px
+  }
+}
+
+// 手势
+.pointer {
+  cursor: pointer;
+}
+
+.bg-white {
+  background: white;
+}
+
+.cl-white {
+  color: white;
+}
+
+.cl-FFFFFF {
+  color: #FFFFFF !important;
+}
+
+.bg-black {
+  background: black;
+}
+
+.bg-black-1 {
+  background: rgba(0, 0, 0, 0.4)
+}
+
+.cl-black {
+  color: black;
+}
+
+.cl-black-i {
+  color: black !important;
+}
+
+.bg-DB1D32 {
+  background: #DB1D32;
+}
+
+.bg-54FF00 {
+  background: #54FF00;
+}
+
+.bg-red {
+  background: red;
+}
+
+.cl-red {
+  color: red;
+}
+
+.bg-yellow {
+  background: yellow;
+}
+
+.cl-yellow {
+  color: yellow;
+}
+
+.bg-gold {
+  background: gold;
+}
+
+.cl-gold {
+  color: gold;
+}
+
+.bg-blue {
+  background: blue;
+}
+
+.cl-blue {
+  color: blue;
+}
+
+.bg-0080FF {
+  background: #0080FF;
+}
+
+.cl-0080FF {
+  color: #0080FF;
+}
+
+.bg-grey {
+  background: grey;
+}
+
+.cl-grey {
+  color: grey;
+}
+
+.bg-orange {
+  background: orange;
+}
+
+.cl-orange {
+  color: orange;
+}
+
+.bg-pink {
+  background: pink;
+}
+
+.cl-pink {
+  color: pink;
+}
+
+.bg-green {
+  background: green;
+}
+
+.cl-green {
+  color: green;
+}
+
+.bg-purple {
+  background: purple;
+}
+
+.cl-purple {
+  color: purple;
+}
+
+.bg-f1f1f1 {
+  background: #f1f1f1;
+}
+
+.cl-f1f1f1 {
+  color: #f1f1f1;
+}
+
+.bg-00a000 {
+  background: #00a000;
+}
+
+.cl-00a000 {
+  color: #00a000;
+}
+
+.bg-A4FE3B {
+  background: #A4FE3B;
+}
+
+.cl-A4FE3B {
+  color: #A4FE3B;
+}
+
+.bg-f4f4f4 {
+  background: #f4f4f4;
+}
+
+.cl-f4f4f4 {
+  color: #f4f4f4;
+}
+
+.bg-a8a8a8 {
+  background: #a8a8a8;
+}
+
+.cl-a8a8a8 {
+  color: #a8a8a8;
+}
+
+.bg-5B360C {
+  background: #5B360C;
+}
+
+.cl-5B360C {
+  color: #5B360C;
+}
+
+.bg-DA3E32 {
+  background: #DA3E32 !important;
+}
+
+.cl-DA3E32 {
+  color: #DA3E32;
+}
+
+.bg-A4FEFF {
+  background: #A4FEFF;
+}
+
+.cl-A4FEFF {
+  color: #A4FEFF;
+}
+
+.bg-A000F0 {
+  background: #A000F0;
+}
+
+.cl-A000F0 {
+  color: #A000F0;
+}
+
+.bg-D3D3D3 {
+  background: #D3D3D3;
+}
+
+.cl-D3D3D3 {
+  color: #D3D3D3;
+}
+
+.bg-EF4B8D {
+  background: #EF4B8D;
+}
+
+.cl-EF4B8D {
+  color: #EF4B8D;
+}
+
+.bg-F2CF40 {
+  background: #F2CF40;
+}
+
+.cl-F2CF40 {
+  color: #F2CF40;
+}
+
+.bg-FFFEE0 {
+  background: #FFFEE0;
+}
+
+.cl-FFFEE0 {
+  color: #FFFEE0;
+}
+
+.cl-646566 {
+  color: #646566;
+}
+
+.bg-mask {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.bg-mask6 {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.bg-mask-white {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.bg-mask-white6 {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+// other
+.w-fit {
+  width: fit-content;
+}
+
+.h-fit {
+  height: fit-content;
+}
+
+.rotate45 {
+  transform: rotate(45deg);
+}
+
+// 移动端h5页面禁止长按选择复制 start
+* {
+  -webkit-touch-callout: none;
+  /*系统默认菜单被禁用*/
+  -webkit-user-select  : none;
+  /*webkit浏览器*/
+  -khtml-user-select   : none;
+  /*早期浏览器*/
+  -moz-user-select     : none;
+  /*火狐*/
+  -ms-user-select      : none;
+  /*IE10*/
+  user-select          : none;
+}
+
+input {
+  -webkit-user-select: auto;
+}
+
+textarea {
+  -webkit-user-select: auto;
+}
+
+// 移动端h5页面禁止长按选择复制 end
+
+.left-auto {
+  margin-left: auto;
+}
+
+.bg-auto {
+  background-repeat  : no-repeat;
+  background-size    : 100% 100%;
+  background-position: 0 0;
+}
+
+.flicker {
+  animation: aBlink 900ms infinite;
+}
+
+@keyframes aBlink {
+  from {
+    // background: rgba(255, 255, 255, 0.8);
+  }
+
+  50% {
+    background: #F9EA64;
+  }
+
+  to {
+    // background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.opacity-0 {
+  opacity: 0
+}
+
+.opacity-1 {
+  opacity: 0.1
+}
+
+.opacity-2 {
+  opacity: 0.2
+}
+
+.opacity-3 {
+  opacity: 0.3
+}
+
+.opacity-4 {
+  opacity: 0.4
+}
+
+.opacity-5 {
+  opacity: 0.5
+}
+
+.opacity-6 {
+  opacity: 0.6
+}
+
+.opacity-7 {
+  opacity: 0.7
+}
+
+.opacity-8 {
+  opacity: 0.8
+}
+
+.opacity-9 {
+  opacity: 0.9
+}
+
+.opacity-10 {
+  opacity: 1
+}
+
+.van-hairline--bottom-black {
+  border: 1px solid black;
+}
+
+.van-hairline--right-black {
+  border: 1px solid black;
+}
+
+// 点击穿透事件
+.pointerEvents {
+  pointer-events: none;
+}
+
+.pointerEvents-visible {
+  pointer-events: visible;
+}
+
+// 扩大点击范围
+.extendClick {
+  position: relative;
+}
+
+.extendClick::before {
+  content : "";
+  position: absolute;
+  top     : -3px;
+  right   : -3px;
+  bottom  : -3px;
+  left    : -3px;
+}
+
+.flex-flow {
+  flex-flow: wrap;
+}
