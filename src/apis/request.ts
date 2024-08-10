@@ -64,7 +64,7 @@ instance.interceptors.response.use(
  * @param {object} data
  * @param {object} params
  */
-export const post = (url, data = {}, params = {}) => {
+export const post = (url : string, data = {}, params = {}) => {
   return instance({
     method: 'post',
     url,
@@ -77,7 +77,7 @@ export const post = (url, data = {}, params = {}) => {
  * @param {string} url
  * @param {object} params
  */
-export const get = (url, params = {}) => {
+export const get = (url : string, params = {}) => {
 
   // uid: '5446223',
   // token : '56ead3c929a64f01ec27fd6d1876227f',
@@ -101,7 +101,7 @@ export const get = (url, params = {}) => {
  * @param {object} data
  * @param {object} params
  */
-export const put = (url, data = {}, params = {}) => {
+export const put = (url : string, data = {}, params = {}) => {
   return instance({
     method: 'put',
     url,
@@ -114,7 +114,7 @@ export const put = (url, data = {}, params = {}) => {
  * @param {string} url
  * @param {object} params
  */
-export const _delete = (url, params = {}) => {
+export const _delete = (url : string, params = {}) => {
   return instance({
     method: 'delete',
     url,
@@ -123,8 +123,8 @@ export const _delete = (url, params = {}) => {
 };
 
 function getURLParameters() {
-  var search = window.location.href.split('?');
-  var params = {};
+  var search : any = window.location.href.split('?');
+  var params : any = {};
 
   if(search.length > 1){
     search = search[1]
