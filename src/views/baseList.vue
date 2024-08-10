@@ -9,7 +9,7 @@
     </BaseList>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import BaseList from '@/components/BaseList.vue'
 import EasyImage from '@/components/EasyImage.vue'
 import Waterfall from '@/components/Waterfall.vue'

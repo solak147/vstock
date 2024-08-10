@@ -22,7 +22,7 @@
     </div>
 </template>
   
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules'
