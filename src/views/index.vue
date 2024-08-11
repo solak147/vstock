@@ -1,6 +1,6 @@
 <template>
     <div class="index">
-        <div class="flex ml-10 bolder fz-18">
+        <div class="flex ml-10 bolder fz-18">    
             <div>{{ indexStore.info.data.name }}</div>
             <div :class="colorConfition" class="ml-10">{{ candles.data.closePrice }}</div>
             <div :class="colorConfition" class="ml-10">{{ `${candles.data.priceUp > 0 ? '+':'-'}${candles.data.priceUp}` }}</div>
@@ -23,7 +23,7 @@
 </template>
   
 <script setup>
-import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch } from 'vue'
+import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules/index.js'
 
@@ -34,18 +34,22 @@ const chart = ref(null);
 const candles = reactive({
     data: {
         list:[],
-        volume: [],          
+        volume: [], 
+        trend: [],         
         category:[],
+        openPrice: '',
         closePrice: '',  //收盤價
         priceUp: '',     //上漲點數
         percent: '',     //上漲幅度     
     }
 })
 
-const colorConfition = { 
-    red: candles.data.closePrice > indexStore.info.data.previousClose,
-    green: candles.data.closePrice < indexStore.info.data.previousClose,
-}
+const colorConfition = computed(() => {
+	return { 
+        red: candles.data.closePrice > indexStore.info.data.previousClose,
+        green: candles.data.closePrice < indexStore.info.data.previousClose,
+    }
+})
 
 const upColor = '#FF5B5B';
 const upBorderColor = '#ff3737';
@@ -82,7 +86,9 @@ const setInfo = () => {
 
 const setCandles = () => {
     candles.data.list = indexStore.candles.data.data.map(item => [item.open, item.close, item.low, item.high])
+    candles.data.trend = indexStore.candles.data.data.map(item => { return { value: [dateFormate(item.date, 'hhmm'), item.close]} }) 
     
+    console.log( candles.data.trend)
     let previousVol 
     candles.data.volume = indexStore.candles.data.data.map((item, key) =>{
         
@@ -102,6 +108,7 @@ const setCandles = () => {
 
     candles.data.category = indexStore.candles.data.data.map(item => dateFormate(item.date, 'hhmm'))
     candles.data.closePrice = candles.data.list[candles.data.list.length - 1][1]
+    candles.data.openPrice = candles.data.list[0][0]
 
     option.value = {
         backgroundColor: '#131313', 
@@ -128,25 +135,28 @@ const setCandles = () => {
              
                 let k = params.filter(item => item.axisIndex == 0)[0]
                 let v = params.filter(item => item.axisIndex == 1)[0]
-                let up = (k.value[2] - candles.data.list[k.dataIndex-1][1]).toFixed(2)
+                let lastClosePrice = candles.data.list[k.dataIndex-1][1]  //上一K棒收價
+                let up = (k.value[2] - lastClosePrice).toFixed(2)
+                let percent = (up / lastClosePrice * 100).toFixed(2)
 
-                return  '<div style=" text-align: left;">' +
-                            params[0].name + '<br/>' +
-                            '開 :<span style="margin-left: 20px"> ' + k.value[1] + '</span><br/>' +
-                            '收 :<span style="margin-left: 20px"> ' + k.value[2] + '</span><br/>' +
-                            '低 :<span style="margin-left: 20px"> ' + k.value[3] + '</span><br/>' +
-                            '高 :<span style="margin-left: 20px"> ' + k.value[4] + '</span><br/>' + 
-                            `<span style="color:${up>0 ? upColor : downColor}">${up>0 ? '漲':'跌'} :<span style="margin-left: 20px">${up}</span></span><br/>` + 
-                            '量 :<span style="margin-left: 20px"> ' + (v.value[1]/100000000).toFixed(3) + '億元</span><br/>' + 
-                       '</div>';
+                return  `<div style=" text-align: left;">
+                            ${params[0].name} <br/>
+                            <span style="color:${ setTooltipColor(k.value[1], lastClosePrice) }">開 :<span style="margin-left: 20px">${k.value[1]}</span></span><br/>
+                            <span style="color:${ setTooltipColor(k.value[2], lastClosePrice) }">收 :<span style="margin-left: 20px">${k.value[2]}</span></span><br/>
+                            <span style="color:${ setTooltipColor(k.value[3], lastClosePrice) }">低 :<span style="margin-left: 20px">${k.value[3]}</span></span><br/>
+                            <span style="color:${ setTooltipColor(k.value[4], lastClosePrice) }">高 :<span style="margin-left: 20px">${k.value[4]}</span></span><br/> 
+                            <span style="color:${ setTooltipColor(up) }">${up>0 ? '漲':'跌'} :<span style="margin-left: 20px">${up>0 ? '+'+ up : up }</span></span><br/>
+                            <span style="color:${ setTooltipColor(up) }">幅 :<span style="margin-left: 20px">${up>0 ? '+'+percent : percent}%</span></span><br/>
+                            量 :<span style="margin-left: 20px">${(v.value[1]/100000000).toFixed(3)}億元</span><br/> 
+                        </div>`;
             },  
             position: function (pos, params, el, elRect, size) {
-          const obj = {
-            top: 10
-          };
-          obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
-          return obj;
-        }
+            const obj = {
+                top: 10
+            };
+            obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+                return obj;
+            }
         },
         axisPointer: {
             link: [
@@ -162,7 +172,7 @@ const setCandles = () => {
             {
                 type: 'inside',
                 xAxisIndex: [0, 1],
-                start: 80,
+                start: 0,
                 end: 100
             },
             {
@@ -170,30 +180,50 @@ const setCandles = () => {
                 xAxisIndex: [0, 1],
                 type: 'slider',
                 top: '85%',
-                start: 80,
+                start: 0,
                 end: 100
             }
         ],
-        visualMap: {
-            show: false,
-            seriesIndex: 1,
-            dimension: 2,
-            pieces: [
-                {
-                    value: -1,
-                    color: downColor
-                },
-                {
-                    value: 1,
-                    color: upColor
-                }
-            ]
+        visualMap: [
+            {
+                show: false,
+                seriesIndex: 1,
+                dimension: 2,
+                pieces: [
+                    {
+                        value: -1,
+                        color: downColor
+                    },
+                    {
+                        value: 1,
+                        color: upColor
+                    }
+                ]
+            },
+            {
+                show: false,
+                seriesIndex: 2,
+                dimension: 1, 
+                pieces: [
+                    {
+                        lte: indexStore.info.data.previousClose - 1,
+                        color: downBorderColor
+                    },
+                    {
+                        gt: indexStore.info.data.previousClose,
+                        color: upBorderColor
+                    },
+                ]
+            },
+        ],
+        legend: {
+            selected: {
+                '一分K': false, 
+                '走勢': true,   
+            },
+            top: 10,
+            data: ['走勢', '一分K', ],
         },
-        // legend: {
-        //   orient: 'vertical',
-        //   left: 'left',
-        //   data: ['Direct', 'Email', 'Ad Networks', 'Video Ads', 'Search Engines'],
-        // },
 
         series: [
             {
@@ -226,6 +256,21 @@ const setCandles = () => {
                 yAxisIndex: 1,
                 data: candles.data.volume
             },
+            {
+                name: '走勢',
+                type: 'line',
+                showSymbol: false,
+                data: candles.data.trend,
+                markLine: {
+                    label:{
+                        show:false
+                    },
+                    symbol: ['none', 'none'],
+                    data: [
+                        { yAxis: indexStore.info.data.previousClose, name: '固定值 100'}
+                    ]
+                }
+            },
         ],
         grid: [
             {
@@ -238,7 +283,7 @@ const setCandles = () => {
                 right: '8%',
                 top: '63%',
                 height: '16%'
-            }
+            },
         ],
         xAxis: [
             {
@@ -261,7 +306,7 @@ const setCandles = () => {
                 axisLabel: { show: false },
                 min: 'dataMin',
                 max: 'dataMax'
-            }
+            },
         ],
         yAxis:[
             {
@@ -272,10 +317,26 @@ const setCandles = () => {
                 splitLine: {
                     lineStyle: {
                         type: 'dashed',  // 設置分隔線為虛線
-                        color: '#ccc',   // 設置分隔線顏色
+                        color: '#3C3C3C',   // 設置分隔線顏色
                         width: 1         // 設置分隔線寬度
                     }
-                }
+                },
+                min: (value) => {
+                    if(candles.data.openPrice > indexStore.info.data.previousClose){
+                        return indexStore.info.data.previousClose * 0.99
+                    }else{
+                        return value.min * 0.99
+                    } 
+                },
+                
+                max: (value) => {
+                    if(candles.data.openPrice > indexStore.info.data.previousClose){
+                        return value.max * 1.01
+                    }else{
+                        return indexStore.info.data.previousClose * 1.01
+                    }
+                  
+                },
             },
             {
                 scale: true,
@@ -285,11 +346,23 @@ const setCandles = () => {
                 axisLine: { show: false },
                 axisTick: { show: false },
                 splitLine: { show: false }
-            }
+            },
+  
         ],
     }
 }
 
+const setTooltipColor = (closePrice, lastClosePrice = 0) => {
+    if(closePrice == lastClosePrice){
+        return 
+    }
+
+    if(closePrice > lastClosePrice){
+        return upColor
+    }else{
+        return downColor
+    }
+}
 
 //2024-08-02T10:25:00.000+08:00 -> 2024-08-02 09:00:00
 const dateFormate = (str, format) => {

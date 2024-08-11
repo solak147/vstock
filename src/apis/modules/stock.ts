@@ -13,3 +13,6 @@ export default class Stock {
   }
 
 }
+
+//https://www.wantgoo.com/blog/daily-featured-section-data?page=1
+//https://www.wantgoo.com/stock/2454/enterprise-value/all
