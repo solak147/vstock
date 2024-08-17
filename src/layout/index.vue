@@ -2,25 +2,23 @@
     <div class="layout">
         <el-row>
             <el-col :span="4">
-                <h5 class="mb-2">富貴險中求</h5>
                 <el-menu
                     active-text-color="#f4af1c"
                     background-color="#131313"
                     class="el-menu-vertical-demo menu"
-                    default-active="2"
+                    default-active="1"
                     text-color="#8b8a8a"
                     @open="handleOpen"
                     @close="handleClose"
                 >
                 
                     <el-menu-item index="1">
-                        <el-icon><icon-menu /></el-icon>
+                        <el-icon><HomeFilled /></el-icon>
                         <span>主頁</span>
                     </el-menu-item>
 
                     <el-sub-menu index="2">
                         <template #title>
-                            <i class="el-icon-search"></i>
                             <el-icon><location /></el-icon>
                             <span>Navigator One</span>
                         </template>
@@ -37,15 +35,6 @@
                         </el-sub-menu>
                     </el-sub-menu>
 
-                    <el-menu-item index="3" disabled>
-                        <el-icon><document /></el-icon>
-                        <span>Navigator Three</span>
-                    </el-menu-item>
-
-                    <el-menu-item index="4">
-                        <el-icon><setting /></el-icon>
-                        <span>Navigator Four</span>
-                    </el-menu-item>
                 </el-menu>
             </el-col>
             <el-col :span="20">

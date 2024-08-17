@@ -77,6 +77,7 @@ onMounted(async () => {
     
     setCandles()
     setInfo()
+
 })
 
 const setInfo = () => {
@@ -88,7 +89,6 @@ const setCandles = () => {
     candles.data.list = indexStore.candles.data.data.map(item => [item.open, item.close, item.low, item.high])
     candles.data.trend = indexStore.candles.data.data.map(item => { return { value: [dateFormate(item.date, 'hhmm'), item.close]} }) 
     
-    console.log( candles.data.trend)
     let previousVol 
     candles.data.volume = indexStore.candles.data.data.map((item, key) =>{
         
@@ -132,14 +132,20 @@ const setCandles = () => {
                 color: '#FFF', 
             },
             formatter: function(params) {
-             
-                let k = params.filter(item => item.axisIndex == 0)[0]
-                let v = params.filter(item => item.axisIndex == 1)[0]
-                let lastClosePrice = candles.data.list[k.dataIndex-1][1]  //上一K棒收價
-                let up = (k.value[2] - lastClosePrice).toFixed(2)
-                let percent = (up / lastClosePrice * 100).toFixed(2)
+                let k = params.filter(item => item.seriesIndex == 0)[0]
+                let v = params.filter(item => item.seriesIndex == 1)[0]
+                let l = params.filter(item => item.seriesIndex == 2)[0]
 
-                return  `<div style=" text-align: left;">
+                let lastClosePrice 
+                let up
+                let percent
+    
+                if(k){
+                    lastClosePrice = candles.data.list[k.dataIndex-1] ? candles.data.list[k.dataIndex-1][1] : indexStore.info.data.previousClose  //上一K棒收價
+                    up = (k.value[2] - lastClosePrice).toFixed(2)
+                    percent = (up / lastClosePrice * 100).toFixed(2)
+
+                    return  `<div style=" text-align: left;">
                             ${params[0].name} <br/>
                             <span style="color:${ setTooltipColor(k.value[1], lastClosePrice) }">開 :<span style="margin-left: 20px">${k.value[1]}</span></span><br/>
                             <span style="color:${ setTooltipColor(k.value[2], lastClosePrice) }">收 :<span style="margin-left: 20px">${k.value[2]}</span></span><br/>
@@ -149,6 +155,21 @@ const setCandles = () => {
                             <span style="color:${ setTooltipColor(up) }">幅 :<span style="margin-left: 20px">${up>0 ? '+'+percent : percent}%</span></span><br/>
                             量 :<span style="margin-left: 20px">${(v.value[1]/100000000).toFixed(3)}億元</span><br/> 
                         </div>`;
+                }else{
+                    lastClosePrice = indexStore.info.data.previousClose  
+                    up = (l.value[1] - lastClosePrice).toFixed(2)
+                    percent = (up / lastClosePrice * 100).toFixed(2)
+
+                    return  `<div style=" text-align: left;">
+                            ${params[0].name} <br/>
+                            <span style="color:${ setTooltipColor(l.value[1], indexStore.info.data.previousClose) }">價 :<span style="margin-left: 20px">${l.value[1]}</span></span><br/>
+                            <span style="color:${ setTooltipColor(up) }">${up>0 ? '漲':'跌'} :<span style="margin-left: 20px">${up>0 ? '+'+ up : up }</span></span><br/>
+                            <span style="color:${ setTooltipColor(up) }">幅 :<span style="margin-left: 20px">${up>0 ? '+'+percent : percent}%</span></span><br/>
+                            量 :<span style="margin-left: 20px">${(v.value[1]/100000000).toFixed(3)}億元</span><br/> 
+                        </div>`;
+                }
+                
+       
             },  
             position: function (pos, params, el, elRect, size) {
             const obj = {
@@ -168,6 +189,24 @@ const setCandles = () => {
                 backgroundColor: '#777'
             }
         },
+        toolbox: {
+                show: true,
+                top: 10,
+                right: 10,
+                feature: {
+                    mytooo: {
+                        show: true,
+                        title: 'Custom Button',
+                        icon: 'path://m160 96.064 192 .192a32 32 0 0 1 0 64l-192-.192V352a32 32 0 0 1-64 0V96h64zm0 831.872V928H96V672a32 32 0 1 1 64 0v191.936l192-.192a32 32 0 1 1 0 64zM864 96.064V96h64v256a32 32 0 1 1-64 0V160.064l-192 .192a32 32 0 1 1 0-64l192-.192zm0 831.872-192-.192a32 32 0 0 1 0-64l192 .192V672a32 32 0 1 1 64 0v256h-64z',
+                      
+                        onclick: function() {              
+                           chart.value.resize({
+                                width: 1500,
+                            })
+                        }
+                    }
+                }
+            },
         dataZoom: [
             {
                 type: 'inside',
@@ -222,6 +261,7 @@ const setCandles = () => {
                 '走勢': true,   
             },
             top: 10,
+            selectedMode: 'single',
             data: ['走勢', '一分K', ],
         },
 
@@ -269,7 +309,49 @@ const setCandles = () => {
                     data: [
                         { yAxis: indexStore.info.data.previousClose, name: '固定值 100'}
                     ]
-                }
+                },
+                markPoint: {
+                    data: [
+                        { 
+                            type: 'max', 
+                            name: 'Max', 
+                            label: {
+                                position: 'top',
+                                distance: -10
+                            }
+                        },
+                        { 
+                            type: 'min', 
+                            name: 'Min',
+                            label: {
+                                position: 'bottom',
+                                distance: -10
+                            }
+                         }
+                    ],
+                    symbol: 'image://',  // 不显示气泡或标记
+                    label: {
+                        show: true,  // 确保显示标签'
+                         
+                        formatter: function(params) {
+                            // 根据数值判断颜色
+                            if (params.value > indexStore.info.data.previousClose) {
+                                return `{a|${params.value}}`;
+                            } else {
+                                return `{b|${params.value}}`;
+                            }
+                        },
+                        rich: {
+                            a: {
+                                color: upColor  // 大于1000时为红色
+                            },
+                            b: {
+                                color: downColor // 小于或等于1000时为蓝色
+                            }
+                        },
+                   
+                    }
+                },
             },
         ],
         grid: [
@@ -323,17 +405,17 @@ const setCandles = () => {
                 },
                 min: (value) => {
                     if(candles.data.openPrice > indexStore.info.data.previousClose){
-                        return indexStore.info.data.previousClose * 0.99
+                        return (indexStore.info.data.previousClose * 0.99).toFixed(0)
                     }else{
-                        return value.min * 0.99
+                        return (value.min * 0.99).toFixed(0)
                     } 
                 },
                 
                 max: (value) => {
                     if(candles.data.openPrice > indexStore.info.data.previousClose){
-                        return value.max * 1.01
+                        return (value.max * 1.01).toFixed(0)
                     }else{
-                        return indexStore.info.data.previousClose * 1.01
+                        return (indexStore.info.data.previousClose * 1.01).toFixed(0)
                     }
                   
                 },

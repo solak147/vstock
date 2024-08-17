@@ -15,6 +15,8 @@ import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { CandlestickChart, BarChart, LineChart  } from 'echarts/charts';
 import {
+  ToolboxComponent,
+  MarkPointComponent,
   MarkLineComponent,
   VisualMapComponent,
   DataZoomComponent,
@@ -25,6 +27,8 @@ import {
 } from 'echarts/components';
 
 use([
+  ToolboxComponent,
+  MarkPointComponent,
   MarkLineComponent,
   VisualMapComponent,
   DataZoomComponent,

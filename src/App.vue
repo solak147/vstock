@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div class="app cl-white">
     <Layout></Layout>
   </div>
 </template>
@@ -61,6 +61,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .app{
+  background-color: #292929;
 }
 
 .chart {

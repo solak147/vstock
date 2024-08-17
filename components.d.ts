@@ -19,10 +19,6 @@ declare module 'vue' {
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    VanCol: typeof import('vant/es')['Col']
-    VanList: typeof import('vant/es')['List']
-    VanPullRefresh: typeof import('vant/es')['PullRefresh']
-    VanRow: typeof import('vant/es')['Row']
     Waterfall: typeof import('./src/components/Waterfall.vue')['default']
   }
 }
