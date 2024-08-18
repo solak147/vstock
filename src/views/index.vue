@@ -10,7 +10,7 @@
         <el-row :gutter="20" class="row">
             <el-col :span="10">
                 <!-- :update-options="{notMerge:true}"  https://juejin.cn/post/7329476133325193251 -->
-                <v-chart ref="chart" class="chart" :option="option" autoresize />
+                <v-chart ref="chart" class="chart" :option="option" @legendselectchanged="legendselectchanged" autoresize />
             </el-col>
             <el-col :span="12">
 
@@ -33,14 +33,18 @@ const chart = ref(null);
 
 const candles = reactive({
     data: {
-        list:[],
-        volume: [], 
-        trend: [],         
+        list:[],        //k棒
+        volume: [],     //量
+        trend: [],      //走勢   
         category:[],
         openPrice: '',
         closePrice: '',  //收盤價
         priceUp: '',     //上漲點數
-        percent: '',     //上漲幅度     
+        percent: '',     //上漲幅度
+        
+        width: '',
+        isBig: false,    //是否放大
+        currentSel: '走勢'   //目前圖表     
     }
 })
 
@@ -77,12 +81,12 @@ onMounted(async () => {
     
     setCandles()
     setInfo()
-
 })
 
 const setInfo = () => {
     candles.data.priceUp = (candles.data.closePrice - indexStore.info.data.previousClose).toFixed(2)
     candles.data.percent =  (candles.data.priceUp / indexStore.info.data.previousClose * 100).toFixed(2)
+    candles.data.width = chart.value.getWidth()
 }
 
 const setCandles = () => {
@@ -199,10 +203,11 @@ const setCandles = () => {
                         title: 'Custom Button',
                         icon: 'path://m160 96.064 192 .192a32 32 0 0 1 0 64l-192-.192V352a32 32 0 0 1-64 0V96h64zm0 831.872V928H96V672a32 32 0 1 1 64 0v191.936l192-.192a32 32 0 1 1 0 64zM864 96.064V96h64v256a32 32 0 1 1-64 0V160.064l-192 .192a32 32 0 1 1 0-64l192-.192zm0 831.872-192-.192a32 32 0 0 1 0-64l192 .192V672a32 32 0 1 1 64 0v256h-64z',
                       
-                        onclick: function() {              
-                           chart.value.resize({
-                                width: 1500,
+                        onclick: function() {                        
+                            chart.value.resize({
+                                width: candles.data.isBig ? candles.data.width : 1500,
                             })
+                            candles.data.isBig = !candles.data.isBig
                         }
                     }
                 }
@@ -404,6 +409,10 @@ const setCandles = () => {
                     }
                 },
                 min: (value) => {
+                    if(candles.data.currentSel == '一分K'){
+                        return value.min
+                    }
+
                     if(candles.data.openPrice > indexStore.info.data.previousClose){
                         return (indexStore.info.data.previousClose * 0.99).toFixed(0)
                     }else{
@@ -412,6 +421,10 @@ const setCandles = () => {
                 },
                 
                 max: (value) => {
+                    if(candles.data.currentSel == '一分K'){
+                        return value.max
+                    }
+
                     if(candles.data.openPrice > indexStore.info.data.previousClose){
                         return (value.max * 1.01).toFixed(0)
                     }else{
@@ -432,6 +445,12 @@ const setCandles = () => {
   
         ],
     }
+}
+
+const legendselectchanged = (params) => {
+    candles.data.currentSel = params.name
+
+    chart.value.resize()
 }
 
 const setTooltipColor = (closePrice, lastClosePrice = 0) => {
@@ -474,6 +493,7 @@ const dateFormate = (str, format) => {
 
 .chart{
     height: 500px;
+    width: 750px;
 }
 
 .row{
