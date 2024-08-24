@@ -29,6 +29,9 @@ instance.interceptors.request.use(
      *  config.headers.token = token
      * }
      */
+    if(config.url?.startsWith('https://script.google.com/')){
+      delete config.headers['X-API-KEY']
+    }
     return config;
   },
   (error) => {
@@ -83,16 +86,16 @@ export const get = (url : string, params = {}) => {
   // token : '56ead3c929a64f01ec27fd6d1876227f',
   // http://13.214.27.204:57769/public/dist/index.html#/?uid=1&token=2
 
-  const mergedParams = {
-    uid: paramObj?.uid,  
-    token: paramObj?.token,
-    ...params,
-  };
+  // const mergedParams = {
+  //   uid: paramObj?.uid,  
+  //   token: paramObj?.token,
+  //   ...params,
+  // };
 
   return instance({
     method: 'get',
     url,
-    params: mergedParams,
+    params: params,
   });
 };
 

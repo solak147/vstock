@@ -6,11 +6,17 @@ export default class Stock {
     return get(`https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/${symbol}`);
   }
 
-  static async getRPActivityInfo () {
-    return get('/public/', {
-        service : 'Activity.getRPActivityInfo',
+  static async getStockHeatMap (symbol: string | number) {
+    return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
+      symbol: symbol
     });
   }
+  
+  // static async getRPActivityInfo () {
+  //   return get('/public/', {
+  //       service : 'Activity.getRPActivityInfo',
+  //   });
+  // }
 
 }
 

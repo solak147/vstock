@@ -15,6 +15,11 @@ export default [
         name: 'index',
         component: () => import('@/views/index.vue'),
       },
+      {
+        path: 'heatMap',
+        name: 'heatMap',
+        component: () => import('@/views/heatMap.vue'),
+      },
     ]
   }
 ]

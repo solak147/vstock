@@ -17,7 +17,12 @@
                         <span>主頁</span>
                     </el-menu-item>
 
-                    <el-sub-menu index="2">
+                    <el-menu-item index="2" @click="$router.push('/heatMap')">
+                        <el-icon><HomeFilled /></el-icon>
+                        <span>類股表現</span>
+                    </el-menu-item>
+
+                    <el-sub-menu index="3">
                         <template #title>
                             <el-icon><location /></el-icon>
                             <span>Navigator One</span>
@@ -45,6 +50,10 @@
 </template>
 
 <script lang="ts" setup>
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
