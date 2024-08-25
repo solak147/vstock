@@ -3,21 +3,22 @@
         <el-row>
             <el-col :span="4">
                 <el-menu
+                    router
                     active-text-color="#f4af1c"
                     background-color="#131313"
                     class="el-menu-vertical-demo menu"
-                    default-active="1"
+                    :default-active="getUrl()"
                     text-color="#8b8a8a"
                     @open="handleOpen"
                     @close="handleClose"
                 >
                 
-                    <el-menu-item index="1">
+                    <el-menu-item index="/index">
                         <el-icon><HomeFilled /></el-icon>
                         <span>主頁</span>
                     </el-menu-item>
 
-                    <el-menu-item index="2" @click="$router.push('/heatMap')">
+                    <el-menu-item index="/heatMap">
                         <el-icon><HomeFilled /></el-icon>
                         <span>類股表現</span>
                     </el-menu-item>
@@ -50,17 +51,22 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute, useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
 
-const router = useRouter()
+// const router = useRouter()
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
+
 const handleClose = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
 
+const getUrl = () => {
+    console.log(location.hash.replace('#',''))
+    return location.hash.replace('#','')
+}
 </script>
 
 <style lang="scss" scoped>

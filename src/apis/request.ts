@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const protocol = window.location.protocol
-const paramObj = getURLParameters()
+// const paramObj = getURLParameters()
 // const domain = paramObj && paramObj.d ? `${protocol}//${paramObj.d}` : ''
 const apiKey = 'YzY2MTY5OWQtMWQ3OC00OTMzLThiZTYtYzViMDA2ZmIzZTg3IDA1ZjEzNDc3LTMzYjAtNDY0OC1hMjVmLWJjODgzNTBkNTRlZQ=='
 
@@ -125,27 +125,27 @@ export const _delete = (url : string, params = {}) => {
   });
 };
 
-function getURLParameters() {
-  var search : any = window.location.href.split('?');
-  var params : any = {};
+// function getURLParameters() {
+//   var search : any = window.location.href.split('?');
+//   var params : any = {};
 
-  if(search.length > 1){
-    search = search[1]
-  }else{
-    return
-  }
+//   if(search.length > 1){
+//     search = search[1]
+//   }else{
+//     return
+//   }
 
-  if (search) {
-    var paramArray = search.split('&');
-    for (var i = 0; i < paramArray.length; i++) {
-      var param = paramArray[i].split('=');
-      var paramName = decodeURIComponent(param[0]);
-      var paramValue = decodeURIComponent(param[1]);
-      params[paramName] = paramValue;
-    }
-  }
+//   if (search) {
+//     var paramArray = search.split('&');
+//     for (var i = 0; i < paramArray.length; i++) {
+//       var param = paramArray[i].split('=');
+//       var paramName = decodeURIComponent(param[0]);
+//       var paramValue = decodeURIComponent(param[1]);
+//       params[paramName] = paramValue;
+//     }
+//   }
   
-  return params;
-}
+//   return params;
+// }
 
 export default instance;

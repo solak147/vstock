@@ -13,7 +13,7 @@ pinia.use(piniaPluginPersistedstate);
 // https://echarts.apache.org/zh/tutorial.html#%E5%BC%82%E6%AD%A5%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD%E5%92%8C%E6%9B%B4%E6%96%B0
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
-import { CandlestickChart, BarChart, LineChart  } from 'echarts/charts';
+import { CandlestickChart, BarChart, LineChart, TreemapChart  } from 'echarts/charts';
 import {
   ToolboxComponent,
   MarkPointComponent,
@@ -27,6 +27,7 @@ import {
 } from 'echarts/components';
 
 use([
+  TreemapChart,
   ToolboxComponent,
   MarkPointComponent,
   MarkLineComponent,

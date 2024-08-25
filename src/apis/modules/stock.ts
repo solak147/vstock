@@ -2,6 +2,17 @@ import { get } from '../request';
 
 export default class Stock {
 
+  
+  //取得股票或指數列表
+  static async getStockList (type: string, market: string, industry: string ) {
+    return get(`https://api.fugle.tw/marketdata/v1.0/stock/intraday/tickers`,{
+      type,
+      market,
+      industry,
+    });
+  }
+
+  //取得股票基本資料（依代碼查詢）
   static async getStockInfo (symbol: string | number) {
     return get(`https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/${symbol}`);
   }
