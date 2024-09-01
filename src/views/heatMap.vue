@@ -11,6 +11,16 @@
         <el-radio-button label="產業" value="industry" />
         <el-radio-button label="個股" value="stock" />
       </el-radio-group>
+
+      <el-radio-group v-model="timeRange" size="large" class="ml-5" @change="heatMapChg">
+        <el-radio-button label="盤中即時" value="" />
+        <el-radio-button label="一週" value="1w" />
+        <el-radio-button label="一月" value="1m" />
+        <el-radio-button label="三月" value="3m" />
+        <el-radio-button label="六月" value="6m" />
+        <el-radio-button label="一年" value="1y" />
+        <el-radio-button label="年初至今" value="ytd" />
+      </el-radio-group>
     </div>
 
     <div style="width: 100%; height: 80% ;">
@@ -31,6 +41,7 @@ const option = ref(null)
 
 const market = ref('IX0001')
 const groupType = ref('industry')
+const timeRange = ref('')
 
 const upColor = '#FF5B5B';
 const upBorderColor = '#ff3737';
@@ -50,10 +61,14 @@ onMounted(async() => {
 
 const heatMapChg = async () => {
   heatMap.loading = true
-  heatMap.data = await API.Stock.getStockHeatMap(market.value)
+  let path = market.value
+  if(timeRange.value){
+    path += `?period=${timeRange.value}`
+  } 
+  heatMap.data = await API.Stock.getStockHeatMap(path)
 
+  //依產業
   if(groupType.value == 'industry'){
-  
     heatMap.data.data.splice(0, 1)
     heatMap.data.data = heatMap.data.data.filter((item) => item.type == 'INDEX')
     heatMap.data.data = heatMap.data.data.map(
@@ -62,6 +77,7 @@ const heatMapChg = async () => {
       })
 
   }else{
+    //依個股
     let data = heatMap.data.data.filter((item) => item.type == 'EQUITY')
     heatMap.data.data = []
 
@@ -83,27 +99,30 @@ const heatMapChg = async () => {
   option.value = {
     series: [
         {
-            name: '發行量加權股價指數',
-            type: 'treemap',
-            data: heatMap.data.data,
-            visualDimension: 1, // 基于第一个维度（涨跌幅度）调整颜色'
+          name: '發行量加權股價指數',
+          type: 'treemap',
+          data: heatMap.data.data,
+          visualDimension: 1, // 基于第一个维度（涨跌幅度）调整颜色'
 
-            upperLabel: {
-              show: true,
-              height: 30,
-              backgroundColor: '#000',  // 设置背景为透明
-              textStyle: {
-                  color: '#ffffff',  // 设置文字颜色为白色
-                  fontSize: 14,      // 可选: 设置文字大小
-                  fontWeight: 'bold' // 可选: 设置文字粗细
-              }
-            },
+          upperLabel: {
+            show: true,
+            height: 30,
+            backgroundColor: '#131313',  // 设置背景为透明
+            textStyle: {
+                color: '#ffffff',
+                fontSize: 14,     
+            }
+          },
+          itemStyle: {
+            borderColor: '#fff',
+            gapWidth: 0.5,
+          },
         }
     ],
     visualMap: {
         type: 'continuous',
-        min: -10, // 最小跌幅
-        max: 10,  // 最大涨幅
+        min: timeRange.value ? -30 : -10, // 最小跌幅
+        max: timeRange.value ? 30 : 10,  // 最大涨幅
         inRange: {
                 color: [downColor, downBorderColor, '#007500', '#3C3C3C', '#750000', upBorderColor, upColor]
         },
