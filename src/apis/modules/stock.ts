@@ -17,6 +17,15 @@ export default class Stock {
     return get(`https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/${symbol}`);
   }
 
+  //取得 1 年內的上市櫃歷史股價（依代碼查詢），個股資料區間最遠可回溯至 2010 年，指數部分最遠可回溯至 2015 年！
+  static async getStockHistory (symbol: string | number, timeframe: string, from: string, to: string) {
+    return get(`https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}`,{
+      timeframe,
+      from,
+      to
+    });
+  }
+  
   static async getStockHeatMap (symbol: string | number) {
     return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
       symbol: symbol

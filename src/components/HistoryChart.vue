@@ -45,7 +45,7 @@ const setOption = () => {
     option.value = {
         backgroundColor: '#131313',
         title: {
-            text: '即時走勢',
+            text: '股價走勢',
             left: 10,
             top: 10,
             bottom: 10,
@@ -159,22 +159,7 @@ const setOption = () => {
         visualMap: [
             {
                 show: false,
-                seriesIndex: 1,
-                dimension: 2,
-                pieces: [
-                    {
-                        value: -1,
-                        color: downColor
-                    },
-                    {
-                        value: 1,
-                        color: upColor
-                    }
-                ]
-            },
-            {
-                show: false,
-                seriesIndex: 2,
+                seriesIndex: 0,
                 dimension: 1,
                 pieces: [
                     {
@@ -199,36 +184,6 @@ const setOption = () => {
         },
 
         series: [
-            {
-                name: '一分K',
-                type: 'candlestick',
-                data: candles.data.list,
-                itemStyle: {
-                    color: upColor,
-                    color0: downColor,
-                    borderColor: upBorderColor,
-                    borderColor0: downBorderColor
-                },
-                tooltip: {
-                    formatter: function (param) {
-                        return param.name + '<br>' + (param.data.coord || '');
-                    }
-                },
-                emphasis: {
-                    itemStyle: {
-                        shadowBlur: 10,
-                        shadowOffsetX: 0,
-                        shadowColor: 'rgba(0, 0, 0, 0.5)',
-                    },
-                },
-            },
-            {
-                name: 'Volume',
-                type: 'bar',
-                xAxisIndex: 1,
-                yAxisIndex: 1,
-                data: candles.data.volume
-            },
             {
                 name: '走勢',
                 type: 'line',
@@ -294,13 +249,7 @@ const setOption = () => {
             {
                 left: '10%',
                 right: '8%',
-                height: '50%'
-            },
-            {
-                left: '10%',
-                right: '8%',
-                top: '63%',
-                height: '16%'
+                height: '65%'
             },
         ],
         xAxis: [
@@ -312,18 +261,6 @@ const setOption = () => {
                 splitLine: { show: false },
                 min: 'dataMin',
                 max: 'dataMax',
-            },
-            {
-                type: 'category',
-                gridIndex: 1,
-                data: candles.data.category,
-                boundaryGap: false,
-                axisLine: { onZero: false },
-                axisTick: { show: false },
-                splitLine: { show: false },
-                axisLabel: { show: false },
-                min: 'dataMin',
-                max: 'dataMax'
             },
         ],
         yAxis: [
@@ -363,15 +300,6 @@ const setOption = () => {
                     }
 
                 },
-            },
-            {
-                scale: true,
-                gridIndex: 1,
-                splitNumber: 2,
-                axisLabel: { show: false },
-                axisLine: { show: false },
-                axisTick: { show: false },
-                splitLine: { show: false }
             },
 
         ],

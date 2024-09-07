@@ -7,13 +7,12 @@
             <div :class="colorConfition" class="ml-10">{{ `${candles.data.priceUp > 0 ? '+':'-'}${candles.data.percent}%` }}</div>
         </div>
 
-        <el-row :gutter="20" class="row">
-            <el-col :span="10">   
+        <el-row class="row" >
+            <el-col :span="12" class="flex justify-center">   
                 <RealTimeChart :candles="candles"></RealTimeChart>
             </el-col>
-            <el-col :span="12">
-
-                11
+            <el-col :span="12" class="flex justify-center">
+                <HistoryChart :candles="candlesHistory"></HistoryChart>
             </el-col>
         </el-row>
 
@@ -24,7 +23,9 @@
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules/index.js'
-import RealTimeChart from '@/components/RealTimeChart.vue';
+import RealTimeChart from '@/components/RealTimeChart.vue'
+import HistoryChart from '@/components/HistoryChart.vue'
+import API from '@/apis'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
@@ -44,6 +45,13 @@ const candles = reactive({
         width: '',
         isBig: false,    //是否放大
         currentSel: '走勢'   //目前圖表     
+    }
+})
+
+const candlesHistory = reactive({
+    data: {
+        trend: [],
+        category:[],
     }
 })
 
@@ -73,6 +81,10 @@ onMounted(async () => {
     
     setCandles()
     setInfo()
+
+    let res = await API.Stock.getStockHistory('IX0001', 'D', '2023-01-01', '2023-12-01')
+    candlesHistory.data.trend = res.data.map(item => { return { value: [ item.date, item.close]} }) 
+    candlesHistory.data.category = res.data.map(item => item.date) 
 })
 
 const setInfo = () => {
