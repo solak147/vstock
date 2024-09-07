@@ -86,11 +86,11 @@ const heatMapChg = async () => {
       let weight = filterObj.reduce((accumulator, item) => {
           return accumulator + item.marketValueWeight  
       }, 0)
-      let parent = { name: item.label, path: item.label, value: weight }
+      let parent = { name: item.label, value: weight }
       parent.children = [...filterObj]
       parent.children = parent.children.map(
         item => { 
-          return { ...item, name: `${item.name}\n${item.changePercent}%`, path: `${parent.name}/${item.name}`, value: [item.marketValueWeight, item.changePercent]} 
+          return { ...item, name: `${item.name}\n${item.changePercent}%`, value: [item.marketValueWeight, item.changePercent]} 
         })
       heatMap.data.data.push(parent)
     })
