@@ -1,6 +1,8 @@
 <template>
-    <!-- :update-options="{notMerge:true}"  https://juejin.cn/post/7329476133325193251 -->
-    <v-chart ref="chart" class="chart" :option="option" @legendselectchanged="legendselectchanged" autoresize />
+    <div>
+        <!-- :update-options="{notMerge:true}"  https://juejin.cn/post/7329476133325193251 -->
+        <v-chart ref="chart" :class="{chart: !candles.data?.isBig, chartBig: candles.data?.isBig,}" :option="option" @legendselectchanged="legendselectchanged" autoresize />
+    </div>
 </template>
 
 <script setup>
@@ -15,6 +17,7 @@ const props = defineProps({
     },
 })
 
+const emit = defineEmits(['reOrder'])
 const indexStore = useIndexStore()
 const chart = ref(null)
 const option = ref(null)
@@ -133,9 +136,10 @@ const setOption = () => {
 
                     onclick: function () {
                         chart.value.resize({
-                            width: candles.data.isBig ? candles.data.width : 1500,
+                            width: candles.data.isBig ? candles.data.width : candles.data.width * 2,
                         })
                         candles.data.isBig = !candles.data.isBig
+                        emit('reOrder', candles.data.isBig, 0)
                     }
                 }
             }
@@ -401,5 +405,12 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 .chart {
     height: 500px;
     width: 40vw;
+    transition: width 1s ease;
+}
+
+.chartBig {
+    height: 500px;
+    width: 80vw;
+    transition: width 1s ease;
 }
 </style>

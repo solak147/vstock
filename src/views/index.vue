@@ -7,15 +7,21 @@
             <div :class="colorConfition" class="ml-10">{{ `${candles.data.priceUp > 0 ? '+':'-'}${candles.data.percent}%` }}</div>
         </div>
 
-        <el-row class="row" >
-            <el-col :span="12" class="flex justify-center">   
-                <RealTimeChart :candles="candles"></RealTimeChart>
-            </el-col>
-            <el-col :span="12" class="flex justify-center">
-                <HistoryChart :candles="candlesHistory"></HistoryChart>
-            </el-col>
-        </el-row>
-
+        <div class="flex justify-around flex-wrap">
+            <transition-group name="fade">
+                <RealTimeChart :candles="candles" 
+                    :style="{ order: order[0] }" 
+                    @reOrder="reOrder"
+                    class="mb-10 orderAnimate">
+                </RealTimeChart>
+                <HistoryChart 
+                    :candles="candlesHistory"
+                    :style="{ order: order[1] }"
+                    @reOrder="reOrder"
+                    class="mb-10 orderAnimate">
+                </HistoryChart>
+            </transition-group>
+        </div>
     </div>
 </template>
   
@@ -29,7 +35,14 @@ import API from '@/apis'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
-const chart = ref(null);
+const chart = ref(null)
+const order = ref([1, 2])
+const reOrder= (isBig, key) => {
+    if(isBig){
+        order.value = order.value.map(item => item + 1)
+        order.value[key] = 1
+    }
+}
 
 const candles = reactive({
     data: {
@@ -161,6 +174,20 @@ const dateFormate = (str, format) => {
 
 .green{
     color:#6fda1a;
+}
+
+.fade-move,
+.fade-enter-active, .fade-leave-active {
+	transition: all 1.5s ease;
+}
+
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+	opacity: 0;
+	transform: translateX(-20px);
+}
+
+.fade-leave-active {
+  position: absolute;
 }
 </style>
   
