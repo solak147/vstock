@@ -32,6 +32,7 @@ import { useIndexStore } from '@/store/modules/index.js'
 import RealTimeChart from '@/components/RealTimeChart.vue'
 import HistoryChart from '@/components/HistoryChart.vue'
 import API from '@/apis'
+import Utils from '@/utils'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
@@ -65,6 +66,7 @@ const candlesHistory = reactive({
     data: {
         trend: [],
         category:[],
+        lastClose: 0, //去年,月收盤均價
     }
 })
 
@@ -95,9 +97,26 @@ onMounted(async () => {
     setCandles()
     setInfo()
 
-    let res = await API.Stock.getStockHistory('IX0001', 'D', '2023-01-01', '2023-12-01')
-    candlesHistory.data.trend = res.data.map(item => { return { value: [ item.date, item.close]} }) 
-    candlesHistory.data.category = res.data.map(item => item.date) 
+    let nowDate  = new Date()
+    let lastYearDate  = new Date()
+    lastYearDate.setFullYear(nowDate.getFullYear() -1)
+    lastYearDate.setDate(lastYearDate.getDate() +1)
+
+    let res = await API.Stock.getStockHistory('IX0001', 'D', Utils.dateFormate(lastYearDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    candlesHistory.data.trend = res.data.map(item => { return { value: [ item.date, item.close]} }).reverse() 
+    candlesHistory.data.category = res.data.map(item => item.date).reverse() 
+
+    nowDate  = new Date()
+    nowDate.setFullYear(nowDate.getFullYear() -1)
+    lastYearDate  = new Date()
+    lastYearDate.setFullYear(nowDate.getFullYear() -1)
+    lastYearDate.setDate(lastYearDate.getDate() +1)
+    res = await API.Stock.getStockHistory('IX0001', 'M', Utils.dateFormate(lastYearDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+   
+    candlesHistory.data.lastClose = Number((res.data.reduce((accumulator, item) => {
+          return accumulator + item.close  
+      }, 0) / 12).toFixed(2))
+
 })
 
 const setInfo = () => {
@@ -107,7 +126,7 @@ const setInfo = () => {
 
 const setCandles = () => {
     candles.data.list = indexStore.candles.data.data.map(item => [item.open, item.close, item.low, item.high])
-    candles.data.trend = indexStore.candles.data.data.map(item => { return { value: [dateFormate(item.date, 'hhmm'), item.close]} }) 
+    candles.data.trend = indexStore.candles.data.data.map(item => { return { value: [Utils.dateFormate(item.date, 'hhmm'), item.close]} }) 
     
     let previousVol 
     candles.data.volume = indexStore.candles.data.data.map((item, key) =>{
@@ -126,30 +145,11 @@ const setCandles = () => {
         return [key, item.volume, color]  
     })
 
-    candles.data.category = indexStore.candles.data.data.map(item => dateFormate(item.date, 'hhmm'))
+    candles.data.category = indexStore.candles.data.data.map(item => Utils.dateFormate(item.date, 'hhmm'))
     candles.data.closePrice = candles.data.list[candles.data.list.length - 1][1]
     candles.data.openPrice = candles.data.list[0][0]
 
  
-}
-
-//2024-08-02T10:25:00.000+08:00 -> 2024-08-02 09:00:00
-const dateFormate = (str, format) => {
-    let isoDateString = str;
-    let date = new Date(isoDateString);
-
-    let year = date.getFullYear();
-    let month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    let day = String(date.getDate()).padStart(2, '0');
-    let hours = String(date.getHours()).padStart(2, '0');
-    let minutes = String(date.getMinutes()).padStart(2, '0');
-    let seconds = String(date.getSeconds()).padStart(2, '0');
-
-    if(format = 'hhmm'){
-        return `${hours}:${minutes}`
-    }
-
-    return`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 </script>

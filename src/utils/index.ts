@@ -90,6 +90,27 @@ const Utils = {
         oS.onerror = function () {
           error && error()
         }
+    },
+
+    //2024-08-02T10:25:00.000+08:00 -> 2024-08-02 09:00:00
+    dateFormate(str: string, format: string) {
+        let isoDateString = str;
+        let date = new Date(isoDateString);
+
+        let year = date.getFullYear();
+        let month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        let day = String(date.getDate()).padStart(2, '0');
+        let hours = String(date.getHours()).padStart(2, '0');
+        let minutes = String(date.getMinutes()).padStart(2, '0');
+        let seconds = String(date.getSeconds()).padStart(2, '0');
+
+        if(format == 'hhmm'){
+            return `${hours}:${minutes}`
+        }else if(format == 'yymmdd'){
+            return `${year}-${month}-${day}`
+        }
+
+        return`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 }
 

@@ -9,6 +9,7 @@
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules/index.js'
+import Utils from '@/utils'
 
 const props = defineProps({
     candles: {
@@ -32,7 +33,7 @@ watch(
     () => props.candles,
     () => {
         candles = props.candles
-        setOption()
+        setOption()   
     },
     {
         deep: true,
@@ -163,15 +164,15 @@ const setOption = () => {
         visualMap: [
             {
                 show: false,
-                seriesIndex: 0,
+                seriesIndex: [0, 1],
                 dimension: 1,
                 pieces: [
                     {
-                        lte: indexStore.info.data.previousClose - 1,
+                        lte: candles.data.lastClose - 1,
                         color: downBorderColor
                     },
                     {
-                        gt: indexStore.info.data.previousClose,
+                        gt: candles.data.lastClose,
                         color: upBorderColor
                     },
                 ]
@@ -179,76 +180,16 @@ const setOption = () => {
         ],
         legend: {
             selected: {
-                '一分K': false,
-                '走勢': true,
+                '1M': false,
+                '3M': false,
+                '1Y': true,
             },
             top: 10,
             selectedMode: 'single',
-            data: ['走勢', '一分K',],
+            data: ['1M', '3M', '1Y'],
         },
 
-        series: [
-            {
-                name: '走勢',
-                type: 'line',
-                showSymbol: false,
-                data: candles.data.trend,
-                markLine: {
-                    label: {
-                        show: false
-                    },
-                    symbol: ['none', 'none'],
-                    data: [
-                        { yAxis: indexStore.info.data.previousClose, name: '固定值 100' }
-                    ],
-                    lineStyle: {
-                        color: '#FFF',
-                    }
-                },
-                markPoint: {
-                    data: [
-                        {
-                            type: 'max',
-                            name: 'Max',
-                            label: {
-                                position: 'top',
-                                distance: -10
-                            }
-                        },
-                        {
-                            type: 'min',
-                            name: 'Min',
-                            label: {
-                                position: 'bottom',
-                                distance: -10
-                            }
-                        }
-                    ],
-                    symbol: 'image://',  // 不显示气泡或标记
-                    label: {
-                        show: true,  // 确保显示标签'
-
-                        formatter: function (params) {
-                            // 根据数值判断颜色
-                            if (params.value > indexStore.info.data.previousClose) {
-                                return `{a|${params.value}}`;
-                            } else {
-                                return `{b|${params.value}}`;
-                            }
-                        },
-                        rich: {
-                            a: {
-                                color: upColor  // 大于1000时为红色
-                            },
-                            b: {
-                                color: downColor // 小于或等于1000时为蓝色
-                            }
-                        },
-
-                    }
-                },
-            },
-        ],
+        series: setSeries(),
         grid: [
             {
                 left: '10%',
@@ -281,34 +222,98 @@ const setOption = () => {
                     }
                 },
                 min: (value) => {
-                    if (candles.data.currentSel == '一分K') {
-                        return value.min
-                    }
-
-                    if (candles.data.openPrice > indexStore.info.data.previousClose) {
-                        return (indexStore.info.data.previousClose * 0.99).toFixed(0)
+                    if (value.min > candles.data.lastClose) {
+                        return (candles.data.lastClose * 0.99).toFixed(0)   
                     } else {
+                       
                         return (value.min * 0.99).toFixed(0)
                     }
                 },
 
-                max: (value) => {
-                    if (candles.data.currentSel == '一分K') {
-                        return value.max
-                    }
-
-                    if (candles.data.openPrice > indexStore.info.data.previousClose) {
+                max: (value) => {    
+                    if (value.max > candles.data.lastClose) {
                         return (value.max * 1.01).toFixed(0)
                     } else {
-                        return (indexStore.info.data.previousClose * 1.01).toFixed(0)
+                        return (candles.data.lastClose * 1.01).toFixed(0)
                     }
-
                 },
             },
 
         ],
     }
 }
+
+const setSeries = () => {
+    let seriesY =  {
+        name: '1Y',
+        type: 'line',
+        showSymbol: false,
+        data: candles.data.trend,
+        markLine: {
+            label: {
+                show: false
+            },
+            symbol: ['none', 'none'],
+            data: [
+                { yAxis: candles.data.lastClose, name: '固定值 100' }
+            ],
+            lineStyle: {
+                color: '#FFF',
+            }
+        },
+        markPoint: {
+            data: [
+                {
+                    type: 'max',
+                    name: 'Max',
+                    label: {
+                        position: 'top',
+                        distance: -10
+                    }
+                },
+                {
+                    type: 'min',
+                    name: 'Min',
+                    label: {
+                        position: 'bottom',
+                        distance: -10
+                    }
+                }
+            ],
+            symbol: 'image://',  // 不显示气泡或标记
+            label: {
+                show: true,  // 确保显示标签'
+
+                formatter: function (params) {
+                    // 根据数值判断颜色
+                    if (params.value > candles.data.lastClose) {
+                        return `{a|${params.value}}`;
+                    } else {
+                        return `{b|${params.value}}`;
+                    }
+                },
+                rich: {
+                    a: {
+                        color: upColor  // 大于1000时为红色
+                    },
+                    b: {
+                        color: downColor // 小于或等于1000时为蓝色
+                    }
+                },
+
+            }
+        },
+    }
+
+    let seriesM = Utils.deepClone({}, seriesY)
+    seriesM.name = '1M'
+
+    let series3M = Utils.deepClone({}, seriesY)
+    series3M.name = '3M'
+
+    return [seriesY, seriesM, series3M]
+
+} 
 
 const legendselectchanged = (params) => {
     candles.data.currentSel = params.name
