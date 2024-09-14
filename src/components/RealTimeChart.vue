@@ -1,7 +1,8 @@
 <template>
     <div>
         <!-- :update-options="{notMerge:true}"  https://juejin.cn/post/7329476133325193251 -->
-        <v-chart ref="chart" :class="{chart: !candles.data?.isBig, chartBig: candles.data?.isBig,}" :option="option" @legendselectchanged="legendselectchanged" autoresize />
+        <v-chart ref="chart" :class="{ chart: !candles.data?.isBig, chartBig: candles.data?.isBig, }" :option="option"
+            @legendselectchanged="legendselectchanged" autoresize />
     </div>
 </template>
 
@@ -194,8 +195,8 @@ const setOption = () => {
         ],
         legend: {
             selected: {
-                '一分K': false,
-                '走勢': true,
+                '走勢': candles.data.currentSel == '走勢',
+                '一分K': candles.data.currentSel == '一分K',
             },
             top: 10,
             selectedMode: 'single',
@@ -348,7 +349,7 @@ const setOption = () => {
                         return value.min
                     }
 
-                    if (candles.data.openPrice > indexStore.info.data.previousClose) {
+                    if (candles.data.low > indexStore.info.data.previousClose) {
                         return (indexStore.info.data.previousClose * 0.99).toFixed(0)
                     } else {
                         return (value.min * 0.99).toFixed(0)
@@ -360,7 +361,7 @@ const setOption = () => {
                         return value.max
                     }
 
-                    if (candles.data.openPrice > indexStore.info.data.previousClose) {
+                    if (candles.data.high > indexStore.info.data.previousClose) {
                         return (value.max * 1.01).toFixed(0)
                     } else {
                         return (indexStore.info.data.previousClose * 1.01).toFixed(0)

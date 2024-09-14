@@ -1,8 +1,9 @@
 <template>
     <div>
         <!-- :update-options="{notMerge:true}"  https://juejin.cn/post/7329476133325193251 -->
-        <v-chart ref="chart" :class="{chart: !candles.data?.isBig, chartBig: candles.data?.isBig,}" :option="option" @legendselectchanged="legendselectchanged" autoresize />
-    </div>       
+        <v-chart ref="chart" :class="{ chart: !candles.data?.isBig, chartBig: candles.data?.isBig, }" :option="option"
+            @legendselectchanged="legendselectchanged" autoresize />
+    </div>
 </template>
 
 <script setup>
@@ -18,7 +19,7 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['reOrder'])
+const emit = defineEmits(['reOrder', 'chgLegend'])
 const indexStore = useIndexStore()
 const chart = ref(null)
 const option = ref(null)
@@ -33,7 +34,7 @@ watch(
     () => props.candles,
     () => {
         candles = props.candles
-        setOption()   
+        setOption()
     },
     {
         deep: true,
@@ -164,7 +165,7 @@ const setOption = () => {
         visualMap: [
             {
                 show: false,
-                seriesIndex: [0, 1],
+                seriesIndex: [0, 1, 2],
                 dimension: 1,
                 pieces: [
                     {
@@ -180,17 +181,27 @@ const setOption = () => {
         ],
         legend: {
             selected: {
-                '1M': false,
-                '3M': false,
-                '1Y': true,
+                '1M': candles.data.currentSel == '1M',
+                '6M': candles.data.currentSel == '6M',
+                '1Y': candles.data.currentSel == '1Y',
             },
             top: 10,
             selectedMode: 'single',
-            data: ['1M', '3M', '1Y'],
+            data: ['1M', '6M', '1Y'],
         },
 
         series: setSeries(),
         grid: [
+            {
+                left: '10%',
+                right: '8%',
+                height: '65%'
+            },
+            {
+                left: '10%',
+                right: '8%',
+                height: '65%'
+            },
             {
                 left: '10%',
                 right: '8%',
@@ -223,14 +234,14 @@ const setOption = () => {
                 },
                 min: (value) => {
                     if (value.min > candles.data.lastClose) {
-                        return (candles.data.lastClose * 0.99).toFixed(0)   
+                        return (candles.data.lastClose * 0.99).toFixed(0)
                     } else {
-                       
+
                         return (value.min * 0.99).toFixed(0)
                     }
                 },
 
-                max: (value) => {    
+                max: (value) => {
                     if (value.max > candles.data.lastClose) {
                         return (value.max * 1.01).toFixed(0)
                     } else {
@@ -244,7 +255,7 @@ const setOption = () => {
 }
 
 const setSeries = () => {
-    let seriesY =  {
+    let seriesY = {
         name: '1Y',
         type: 'line',
         showSymbol: false,
@@ -309,16 +320,15 @@ const setSeries = () => {
     seriesM.name = '1M'
 
     let series3M = Utils.deepClone({}, seriesY)
-    series3M.name = '3M'
+    series3M.name = '6M'
 
-    return [seriesY, seriesM, series3M]
+    return [seriesY, seriesM, series3M,]
 
-} 
+}
 
 const legendselectchanged = (params) => {
     candles.data.currentSel = params.name
-
-    chart.value.resize()
+    emit('chgLegend', params.name)
 }
 
 const setTooltipColor = (closePrice, lastClosePrice = 0) => {
@@ -346,5 +356,4 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     width: 80vw;
     transition: width 1s ease;
 }
-
 </style>

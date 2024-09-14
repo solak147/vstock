@@ -16,7 +16,7 @@
                     class="mb-10 orderAnimate">
                 </RealTimeChart>
                 <HistoryChart :candles="candlesHistory" :style="{ order: order[1] }" @reOrder="reOrder"
-                    class="mb-10 orderAnimate">
+                    @chgLegend="chgHistoryLegend" class="mb-10 orderAnimate">
                 </HistoryChart>
             </transition-group>
         </div>
@@ -49,7 +49,8 @@ const candles = reactive({
         volume: [],     //量
         trend: [],      //走勢   
         category: [],
-        openPrice: '',
+        low: '',
+        high: '',
         closePrice: '',  //收盤價
         priceUp: '',     //上漲點數
         percent: '',     //上漲幅度
@@ -65,6 +66,7 @@ const candlesHistory = reactive({
         trend: [],
         category: [],
         lastClose: 0, //去年,月收盤均價
+        currentSel: '1Y'  //目前圖表     
     }
 })
 
@@ -92,29 +94,12 @@ onMounted(async () => {
         return
     }
 
+    //即時走勢
     setCandles()
     setInfo()
 
-    let nowDate = new Date()
-    let lastYearDate = new Date()
-    lastYearDate.setFullYear(nowDate.getFullYear() - 1)
-    lastYearDate.setDate(lastYearDate.getDate() + 1)
-
-    let res = await API.Stock.getStockHistory('IX0001', 'D', Utils.dateFormate(lastYearDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-    candlesHistory.data.trend = res.data.map(item => { return { value: [item.date, item.close] } }).reverse()
-    candlesHistory.data.category = res.data.map(item => item.date).reverse()
-
-    nowDate = new Date()
-    nowDate.setFullYear(nowDate.getFullYear() - 1)
-    lastYearDate = new Date()
-    lastYearDate.setFullYear(nowDate.getFullYear() - 1)
-    lastYearDate.setDate(lastYearDate.getDate() + 1)
-    res = await API.Stock.getStockHistory('IX0001', 'M', Utils.dateFormate(lastYearDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-
-    candlesHistory.data.lastClose = Number((res.data.reduce((accumulator, item) => {
-        return accumulator + item.close
-    }, 0) / 12).toFixed(2))
-
+    //歷史走勢
+    serHistoryCandles('1Y')
 })
 
 const setInfo = () => {
@@ -145,7 +130,50 @@ const setCandles = () => {
 
     candles.data.category = indexStore.candles.data.data.map(item => Utils.dateFormate(item.date, 'hhmm'))
     candles.data.closePrice = candles.data.list[candles.data.list.length - 1][1]
-    candles.data.openPrice = candles.data.list[0][0]
+    candles.data.low = candles.data.list.reduce((prev, curr) => (prev[1] < curr[1] ? prev : curr))
+    candles.data.high = candles.data.list.reduce((prev, curr) => (prev[1] > curr[1] ? prev : curr))
+}
+
+const serHistoryCandles = async (during) => {
+    let res
+    let nowDate = new Date()
+    let lastDate = new Date()
+
+    if (during == '1Y') {
+        lastDate.setFullYear(nowDate.getFullYear() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+    } else if (during == '6M') {
+        lastDate.setMonth(nowDate.getMonth() - 6)
+        lastDate.setDate(lastDate.getDate() + 1)
+    } else if (during == '1M') {
+        lastDate.setMonth(nowDate.getMonth() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+    }
+
+    res = await API.Stock.getStockHistory('IX0001', 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    candlesHistory.data.trend = res.data.map(item => { return { value: [item.date, item.close] } }).reverse()
+    candlesHistory.data.category = res.data.map(item => item.date).reverse()
+
+    nowDate = new Date()
+    lastDate = new Date()
+
+    //找上次平均收盤價,markLine顯示用
+    if (during == '1Y') {
+        nowDate.setFullYear(nowDate.getFullYear() - 1)
+    } else if (during == '6M') {
+        nowDate.setMonth(nowDate.getMonth() - 6)
+    } else if (during == '1M') {
+        nowDate.setMonth(nowDate.getMonth() - 1)
+    }
+
+    res = await API.Stock.getStockHistory('IX0001', 'M', Utils.dateFormate(nowDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    candlesHistory.data.lastClose = res.data[0].close
+
+
+}
+
+const chgHistoryLegend = (legend) => {
+    serHistoryCandles(legend)
 }
 
 </script>
