@@ -83,13 +83,13 @@ const setOption = () => {
 
                     return `<div style=" text-align: left;">
                         ${params[0].name} <br/>
-                        <span style="color:${setTooltipColor(k.value[1], lastClosePrice)}">開 :<span style="margin-left: 20px">${k.value[1]}</span></span><br/>
-                        <span style="color:${setTooltipColor(k.value[2], lastClosePrice)}">收 :<span style="margin-left: 20px">${k.value[2]}</span></span><br/>
-                        <span style="color:${setTooltipColor(k.value[3], lastClosePrice)}">低 :<span style="margin-left: 20px">${k.value[3]}</span></span><br/>
-                        <span style="color:${setTooltipColor(k.value[4], lastClosePrice)}">高 :<span style="margin-left: 20px">${k.value[4]}</span></span><br/> 
-                        <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 20px">${up > 0 ? '+' + up : up}</span></span><br/>
-                        <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 20px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
-                        量 :<span style="margin-left: 20px">${(v.value[1] / 100000000).toFixed(3)}億元</span><br/> 
+                        <span style="color:${setTooltipColor(k.value[1], lastClosePrice)}">開 :<span style="margin-left: 10px">${k.value[1]}</span></span><br/>
+                        <span style="color:${setTooltipColor(k.value[2], lastClosePrice)}">收 :<span style="margin-left: 10px">${k.value[2]}</span></span><br/>
+                        <span style="color:${setTooltipColor(k.value[3], lastClosePrice)}">低 :<span style="margin-left: 10px">${k.value[3]}</span></span><br/>
+                        <span style="color:${setTooltipColor(k.value[4], lastClosePrice)}">高 :<span style="margin-left: 10px">${k.value[4]}</span></span><br/> 
+                        <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 10px">${up > 0 ? '+' + up : up}</span></span><br/>
+                        <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 10px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
+                        量 :<span style="margin-left: 10px">${(v.value[1] / 100000000).toFixed(3)}億元</span><br/> 
                     </div>`;
                 } else {
                     lastClosePrice = indexStore.info.data.previousClose
@@ -98,10 +98,10 @@ const setOption = () => {
 
                     return `<div style=" text-align: left;">
                         ${params[0].name} <br/>
-                        <span style="color:${setTooltipColor(l.value[1], indexStore.info.data.previousClose)}">價 :<span style="margin-left: 20px">${l.value[1]}</span></span><br/>
-                        <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 20px">${up > 0 ? '+' + up : up}</span></span><br/>
-                        <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 20px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
-                        量 :<span style="margin-left: 20px">${(v.value[1] / 100000000).toFixed(3)}億元</span><br/> 
+                        <span style="color:${setTooltipColor(l.value[1], indexStore.info.data.previousClose)}">價 :<span style="margin-left: 10px">${l.value[1]}</span></span><br/>
+                        <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 10px">${up > 0 ? '+' + up : up}</span></span><br/>
+                        <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 10px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
+                        量 :<span style="margin-left: 10px">${(v.value[1] / 100000000).toFixed(3)}億元</span><br/> 
                     </div>`;
                 }
 

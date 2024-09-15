@@ -69,44 +69,8 @@ const setOption = () => {
                 color: '#FFF',
             },
             formatter: function (params) {
-                let k = params.filter(item => item.seriesIndex == 0)[0]
-                let v = params.filter(item => item.seriesIndex == 1)[0]
-                let l = params.filter(item => item.seriesIndex == 2)[0]
-
-                let lastClosePrice
-                let up
-                let percent
-
-                if (k) {
-                    lastClosePrice = candles.data.list[k.dataIndex - 1] ? candles.data.list[k.dataIndex - 1][1] : indexStore.info.data.previousClose  //上一K棒收價
-                    up = (k.value[2] - lastClosePrice).toFixed(2)
-                    percent = (up / lastClosePrice * 100).toFixed(2)
-
-                    return `<div style=" text-align: left;">
-                        ${params[0].name} <br/>
-                        <span style="color:${setTooltipColor(k.value[1], lastClosePrice)}">開 :<span style="margin-left: 20px">${k.value[1]}</span></span><br/>
-                        <span style="color:${setTooltipColor(k.value[2], lastClosePrice)}">收 :<span style="margin-left: 20px">${k.value[2]}</span></span><br/>
-                        <span style="color:${setTooltipColor(k.value[3], lastClosePrice)}">低 :<span style="margin-left: 20px">${k.value[3]}</span></span><br/>
-                        <span style="color:${setTooltipColor(k.value[4], lastClosePrice)}">高 :<span style="margin-left: 20px">${k.value[4]}</span></span><br/> 
-                        <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 20px">${up > 0 ? '+' + up : up}</span></span><br/>
-                        <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 20px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
-                        量 :<span style="margin-left: 20px">${(v.value[1] / 100000000).toFixed(3)}億元</span><br/> 
-                    </div>`;
-                } else {
-                    lastClosePrice = indexStore.info.data.previousClose
-                    up = (l.value[1] - lastClosePrice).toFixed(2)
-                    percent = (up / lastClosePrice * 100).toFixed(2)
-
-                    return `<div style=" text-align: left;">
-                        ${params[0].name} <br/>
-                        <span style="color:${setTooltipColor(l.value[1], indexStore.info.data.previousClose)}">價 :<span style="margin-left: 20px">${l.value[1]}</span></span><br/>
-                        <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 20px">${up > 0 ? '+' + up : up}</span></span><br/>
-                        <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 20px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
-                        量 :<span style="margin-left: 20px">${(v.value[1] / 100000000).toFixed(3)}億元</span><br/> 
-                    </div>`;
-                }
-
-
+                return `<div style="text-align: left;">${params[0].value[0]}<div>
+                        <div> 股價:<span style="padding-left: 10px">${params[0].value[1]}</span><div>`
             },
             position: function (pos, params, el, elRect, size) {
                 const obj = {
