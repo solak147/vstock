@@ -18,8 +18,12 @@
                 <HistoryChart :candles="candlesHistory" :style="{ order: order[1] }" @reOrder="reOrder"
                     @chgLegend="chgHistoryLegend" class="mb-10 orderAnimate">
                 </HistoryChart>
+
+                <PttCard :pttArr="pttArr" :style="{ order: order[2] }"></PttCard>
             </transition-group>
+
         </div>
+
     </div>
 </template>
 
@@ -29,13 +33,14 @@ import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules/index.js'
 import RealTimeChart from '@/components/RealTimeChart.vue'
 import HistoryChart from '@/components/HistoryChart.vue'
+import PttCard from '@/components/PttCard.vue'
 import API from '@/apis'
 import Utils from '@/utils'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
 const chart = ref(null)
-const order = ref([1, 2])
+const order = ref([1, 2, 3])
 const reOrder = (isBig, key) => {
     if (isBig) {
         order.value = order.value.map(item => item + 1)
@@ -70,6 +75,8 @@ const candlesHistory = reactive({
     }
 })
 
+const pttArr = ref([])
+
 const colorConfition = computed(() => {
     return {
         red: candles.data.closePrice > indexStore.info.data.previousClose,
@@ -100,6 +107,9 @@ onMounted(async () => {
 
     //歷史走勢
     serHistoryCandles('1Y')
+
+    let res = await API.Stock.getPttArticle('IX0001')
+    pttArr.value = res.data.content.rawContent
 })
 
 const setInfo = () => {
@@ -181,6 +191,8 @@ const chgHistoryLegend = (legend) => {
 <style lang="scss" scoped>
 .index {
     padding: 30px 10px;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .row {

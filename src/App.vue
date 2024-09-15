@@ -20,8 +20,8 @@ onMounted(async () => {
     socket.send(
       JSON.stringify({
         event: 'auth',
-          data: {
-            apikey: 'YzY2MTY5OWQtMWQ3OC00OTMzLThiZTYtYzViMDA2ZmIzZTg3IDA1ZjEzNDc3LTMzYjAtNDY0OC1hMjVmLWJjODgzNTBkNTRlZQ==',
+        data: {
+          apikey: 'YzY2MTY5OWQtMWQ3OC00OTMzLThiZTYtYzViMDA2ZmIzZTg3IDA1ZjEzNDc3LTMzYjAtNDY0OC1hMjVmLWJjODgzNTBkNTRlZQ==',
         },
       }),
     );
@@ -60,11 +60,7 @@ onMounted(async () => {
 </style>
 
 <style lang="scss" scoped>
-.app{
+.app {
   background-color: #292929;
-}
-
-.chart {
-  height: 100vh;
 }
 </style>

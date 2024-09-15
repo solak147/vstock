@@ -25,10 +25,20 @@ export default class Stock {
       to
     });
   }
+
+  //取得 Ptt文章
+  static async getPttArticle (symbol: string | number) {
+    return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
+      symbol: symbol,
+      action: 'getPttArticle'
+    });
+  }
   
+  //取得 熱力圖
   static async getStockHeatMap (symbol: string | number) {
     return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
-      symbol: symbol
+      symbol: symbol,
+      action: 'getHeatMap'
     });
   }
   
@@ -42,3 +52,7 @@ export default class Stock {
 
 //https://www.wantgoo.com/blog/daily-featured-section-data?page=1
 //https://www.wantgoo.com/stock/2454/enterprise-value/all
+
+
+//https://www.fugle.tw/api/v2/data/contents/FCNT000099?symbol_id=IX0001
+//https://www.fugle.tw/api/v2/data/contents/FCNT000039?symbol_id=IX0001
