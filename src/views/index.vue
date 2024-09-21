@@ -191,8 +191,13 @@ const chgHistoryLegend = (legend) => {
 <style lang="scss" scoped>
 .index {
     padding: 30px 10px;
-    height: 100vh;
+    height: calc(100vh - 60px);
     overflow-y: auto;
+}
+
+.index::-webkit-scrollbar {
+    display: none;
+    /* 適用於 Webkit 瀏覽器 (Chrome, Safari) */
 }
 
 .row {
