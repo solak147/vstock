@@ -135,8 +135,8 @@ const setCandles = () => {
 
     candles.data.category = indexStore.candles.data.data.map(item => Utils.dateFormate(item.date, 'hhmm'))
     candles.data.closePrice = candles.data.list[candles.data.list.length - 1][1]
-    candles.data.low = candles.data.list.reduce((prev, curr) => (prev[1] < curr[1] ? prev : curr))
-    candles.data.high = candles.data.list.reduce((prev, curr) => (prev[1] > curr[1] ? prev : curr))
+    candles.data.low = candles.data.list.reduce((prev, curr) => (prev[1] < curr[1] ? prev : curr))[2]
+    candles.data.high = candles.data.list.reduce((prev, curr) => (prev[1] > curr[1] ? prev : curr))[3]
 }
 
 const serHistoryCandles = async (during) => {
