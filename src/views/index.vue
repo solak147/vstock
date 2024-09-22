@@ -19,7 +19,7 @@
                     @chgLegend="chgHistoryLegend" class="mb-10 orderAnimate">
                 </HistoryChart>
 
-                <PttCard :pttArr="pttArr" :style="{ order: order[2] }"></PttCard>
+                <PttCard symbol="IX0001" :style="{ order: order[2] }"></PttCard>
             </transition-group>
 
         </div>
@@ -75,8 +75,6 @@ const candlesHistory = reactive({
     }
 })
 
-const pttArr = ref([])
-
 const colorConfition = computed(() => {
     return {
         red: candles.data.closePrice > indexStore.info.data.previousClose,
@@ -107,9 +105,6 @@ onMounted(async () => {
 
     //歷史走勢
     serHistoryCandles('1Y')
-
-    let res = await API.Stock.getPttArticle('IX0001')
-    pttArr.value = res.data.content.rawContent
 })
 
 const setInfo = () => {

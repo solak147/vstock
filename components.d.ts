@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     BaseList: typeof import('./src/components/BaseList.vue')['default']
     EasyImage: typeof import('./src/components/EasyImage.vue')['default']
+    ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
     ElCards: typeof import('element-plus/es')['ElCards']
     ElCol: typeof import('element-plus/es')['ElCol']
@@ -32,5 +33,8 @@ declare module 'vue' {
     VanPullRefresh: typeof import('vant/es')['PullRefresh']
     VanRow: typeof import('vant/es')['Row']
     Waterfall: typeof import('./src/components/Waterfall.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    vLoading: typeof import('element-plus/es')['ElLoadingDirective']
   }
 }
