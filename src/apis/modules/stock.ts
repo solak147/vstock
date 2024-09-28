@@ -26,6 +26,14 @@ export default class Stock {
     });
   }
 
+  //取得 三大法人
+  static async getLegalPerson (symbol: string | number) {
+    return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
+      symbol: symbol,
+      action: 'getLegalPerson'
+    });
+  }
+
   //取得 Ptt文章
   static async getPttArticle (symbol: string | number, timestamp_start: string | number) {
     return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
@@ -57,3 +65,5 @@ export default class Stock {
 
 //https://www.fugle.tw/api/v2/data/contents/FCNT000099?symbol_id=IX0001
 //https://www.fugle.tw/api/v2/data/contents/FCNT000039?symbol_id=IX0001
+
+//https://www.fugle.tw/api/v2/data/card-specs

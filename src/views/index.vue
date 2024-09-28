@@ -12,14 +12,17 @@
 
         <div class="flex justify-around flex-wrap">
             <transition-group name="fade">
-                <RealTimeChart :candles="candles" :style="{ order: order[0] }" @reOrder="reOrder"
-                    class="mb-10 orderAnimate">
+                <RealTimeChart :candles="candles" :style="{ order: order[0] }" @reOrder="reOrder" class="mb-10">
                 </RealTimeChart>
+
                 <HistoryChart :candles="candlesHistory" :style="{ order: order[1] }" @reOrder="reOrder"
-                    @chgLegend="chgHistoryLegend" class="mb-10 orderAnimate">
+                    @chgLegend="chgHistoryLegend" class="mb-10">
                 </HistoryChart>
 
-                <PttCard symbol="IX0001" :style="{ order: order[2] }"></PttCard>
+                <LegalPersonChart symbol="IX0001" :style="{ order: order[2] }"></LegalPersonChart>
+
+                <PttCard symbol="IX0001" :style="{ order: order[3] }"></PttCard>
+
             </transition-group>
 
         </div>
@@ -33,6 +36,7 @@ import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules/index.js'
 import RealTimeChart from '@/components/RealTimeChart.vue'
 import HistoryChart from '@/components/HistoryChart.vue'
+import LegalPersonChart from '@/components/LegalPersonChart.vue'
 import PttCard from '@/components/PttCard.vue'
 import API from '@/apis'
 import Utils from '@/utils'
@@ -40,7 +44,7 @@ import Utils from '@/utils'
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
 const chart = ref(null)
-const order = ref([1, 2, 3])
+const order = ref([1, 2, 3, 4])
 const reOrder = (isBig, key) => {
     if (isBig) {
         order.value = order.value.map(item => item + 1)
@@ -164,14 +168,17 @@ const serHistoryCandles = async (during) => {
 
     //找上次平均收盤價,markLine顯示用
     if (during == '1Y') {
-        nowDate.setFullYear(nowDate.getFullYear() - 1)
+        lastDate.setFullYear(nowDate.getFullYear() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
     } else if (during == '6M') {
-        nowDate.setMonth(nowDate.getMonth() - 6)
+        lastDate.setMonth(nowDate.getMonth() - 6)
+        lastDate.setDate(lastDate.getDate() + 1)
     } else if (during == '1M') {
-        nowDate.setMonth(nowDate.getMonth() - 1)
+        lastDate.setMonth(nowDate.getMonth() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
     }
 
-    res = await API.Stock.getStockHistory('IX0001', 'M', Utils.dateFormate(nowDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    res = await API.Stock.getStockHistory('IX0001', 'M', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
     candlesHistory.data.lastClose = res.data[0].close
 
 

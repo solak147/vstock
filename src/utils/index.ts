@@ -108,6 +108,8 @@ const Utils = {
             return `${hours}:${minutes}`
         }else if(format == 'yymmdd'){
             return `${year}-${month}-${day}`
+        }else if(format == 'yymm'){
+             return `${year}-${month}`
         }
 
         return`${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;

@@ -1,7 +1,7 @@
 <template>
     <div class="pttCard" v-loading="pttArr.slice((currentPage - 1) * pageSize, currentPage * pageSize).length == 0"
         element-loading-background="transparent">
-        <h4 class="text-left">PTT批踢踢</h4>
+        <h4 class="text-left pl-20">PTT批踢踢</h4>
         <div class="articleWrap">
             <div v-for="(item, key) in pttArr.slice((currentPage - 1) * pageSize, currentPage * pageSize)" :key="key"
                 class="flex justify-between mb-10">
@@ -11,7 +11,7 @@
             </div>
         </div>
         <el-pagination layout="prev, pager, next, slot" background :total="pttArr.length" :pageSize="pageSize"
-            v-model:current-page="currentPage" @change="pageChg" class="mb-10">
+            v-model:current-page="currentPage" @change="pageChg" class="mb-10 pl-20">
 
             <template #default>
                 <el-button @click="nextClick">
@@ -85,10 +85,11 @@ const nextClick = async () => {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 0 20px;
+
 
     .articleWrap {
         min-height: 47vh;
+        padding: 0 20px;
     }
 }
 </style>

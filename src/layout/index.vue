@@ -63,7 +63,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 }
 
 const getUrl = () => {
-    console.log(location.hash.replace('#', ''))
+    // console.log(location.hash.replace('#', ''))
     return location.hash.replace('#', '')
 }
 </script>
