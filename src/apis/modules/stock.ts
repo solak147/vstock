@@ -62,8 +62,10 @@ export default class Stock {
 //https://www.wantgoo.com/blog/daily-featured-section-data?page=1
 //https://www.wantgoo.com/stock/2454/enterprise-value/all
 
-
+//spec
+//https://www.fugle.tw/api/v2/data/card-specs
 //https://www.fugle.tw/api/v2/data/contents/FCNT000099?symbol_id=IX0001
 //https://www.fugle.tw/api/v2/data/contents/FCNT000039?symbol_id=IX0001
 
-//https://www.fugle.tw/api/v2/data/card-specs
+//選股
+//https://www.cmoney.tw/screeners/

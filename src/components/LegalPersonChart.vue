@@ -4,7 +4,7 @@
         <v-chart ref="chart" :class="{ chart: !legalPerson.data?.isBig, chartBig: legalPerson.data?.isBig, }"
             :option="option" :loading="loading" @legendselectchanged="legendselectchanged" autoresize />
 
-        <el-select v-model="duringModel" placeholder="Select" size="small" class="duringSel">
+        <el-select v-model="duringModel" placeholder="Select" size="small" class="duringSel" @change="duringChg">
             <el-option v-for="item in duringOptions" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
     </div>
@@ -33,21 +33,21 @@ const duringOptions = [
         label: '1Y',
     },
     {
-        value: '1M',
-        label: '1M',
-    },
-    {
         value: '6M',
         label: '6M',
     },
+    {
+        value: '1M',
+        label: '1M',
+    },
 ]
-const upColor = '#FF5B5B';
-const upBorderColor = '#ff3737';
-const downColor = '#91F840';
-const downBorderColor = '#6fda1a';
 
 const fiUpColor = '#f4af1c'
 const fiDownColor = '#f4af1c66'
+const itUpColor = '#EE8379'
+const itDownColor = '#EE837966'
+const dlUpColor = '#64A0DD'
+const dlDownColor = '#64A0DD66'
 
 let legalPerson = reactive({
     data: {
@@ -55,7 +55,9 @@ let legalPerson = reactive({
 
         originData: {},
         category: [],
-        FI: [],
+        FI: [],  //外資
+        IT: [],  //投信
+        DL: [],  //自營商
     }
 })
 
@@ -64,9 +66,21 @@ onMounted(async () => {
     let res = await API.Stock.getLegalPerson(props.symbol)
     legalPerson.data.originData = res.data.content.rawContent
 
-    let lastDate = new Date()
-    lastDate.setMonth(lastDate.getMonth() - 6)
+    duringChg()
 
+    loading.value = false
+})
+
+const duringChg = () => {
+    let lastDate = new Date()
+
+    if (duringModel.value == '1Y') {
+        lastDate.setFullYear(lastDate.getFullYear() - 1)
+    } else if (duringModel.value == '6M') {
+        lastDate.setMonth(lastDate.getMonth() - 6)
+    } else if (duringModel.value == '1M') {
+        lastDate.setMonth(lastDate.getMonth() - 1)
+    }
 
     let tmpData = legalPerson.data.originData.filter(item => new Date(item.date) > lastDate)
 
@@ -84,9 +98,32 @@ onMounted(async () => {
         return [key, item.FIbuy - item.FIsell, color]
     })
 
+    legalPerson.data.IT = tmpData.map((item, key) => {
+        let color = 1
+
+        if (item.ITbuy > item.ITsell) {
+            color = 1
+        } else {
+            color = -1
+        }
+
+        return [key, item.ITbuy - item.ITsell, color]
+    })
+
+    legalPerson.data.DL = tmpData.map((item, key) => {
+        let color = 1
+
+        if (item.DLbuy > item.DLsell) {
+            color = 1
+        } else {
+            color = -1
+        }
+
+        return [key, item.DLbuy - item.DLsell, color]
+    })
+
     setOption()
-    loading.value = false
-})
+}
 
 const setOption = () => {
     option.value = {
@@ -111,16 +148,33 @@ const setOption = () => {
                 color: '#FFF',
             },
             formatter: function (params) {
-                console.log(params)
                 let fi = params.filter(item => item.seriesIndex == 0)[0]
+                let it = params.filter(item => item.seriesIndex == 1)[0]
+                let dl = params.filter(item => item.seriesIndex == 2)[0]
 
-
+                let sum = 0
+                if (fi) sum += fi.value[1]
+                if (it) sum += it.value[1]
+                if (dl) sum += dl.value[1]
+                sum = (sum / 1000).toFixed(0)
 
                 return `<div style="text-align: left;">
-                    ${fi.axisValue} (仟元)<br/>
+                    ${params[0]?.axisValue} (仟元)<br/>
                     <span>
                         <span style="width:10px; height:10px; background:#f4af1c; display:inline-block;"></span>
-                        外資 :<span style="margin-left: 10px">${(fi.value[1] / 1000).toFixed(0)}</span>
+                        外資 :<span style="margin-left: 10px; float: right;">${fi ? (fi.value[1] / 1000).toFixed(0) : 0}</span>
+                    </span><br/>
+                    <span>
+                        <span style="width:10px; height:10px; background:#EE8379; display:inline-block;"></span>
+                        投信 :<span style="margin-left: 10px; float: right;">${it ? (it.value[1] / 1000).toFixed(0) : 0}</span>
+                    </span><br/>
+                    <span>
+                        <span style="width:10px; height:10px; background:#64A0DD; display:inline-block;"></span>
+                        自營商 :<span style="margin-left: 10px; float: right;">${dl ? (dl.value[1] / 1000).toFixed(0) : 0}</span>
+                    </span><br/>
+                    <span>
+                        <span style="width:10px; height:10px; background:#64A0DD; display:inline-block;"></span>
+                        合計 :<span style="margin-left: 10px; float: right;">${sum}</span>
                     </span><br/>
                 </div>`;
 
@@ -198,10 +252,40 @@ const setOption = () => {
                     }
                 ]
             },
+            {
+                show: false,
+                seriesIndex: 1,
+                dimension: 2,
+                pieces: [
+                    {
+                        value: -1,
+                        color: itDownColor
+                    },
+                    {
+                        value: 1,
+                        color: itUpColor
+                    }
+                ]
+            },
+            {
+                show: false,
+                seriesIndex: 2,
+                dimension: 2,
+                pieces: [
+                    {
+                        value: -1,
+                        color: dlDownColor
+                    },
+                    {
+                        value: 1,
+                        color: dlUpColor
+                    }
+                ]
+            },
         ],
         legend: {
             top: 10,
-            data: ['外資',],
+            data: ['外資', '投信', '自營商'],
         },
 
         series: [
@@ -210,9 +294,30 @@ const setOption = () => {
                 type: 'bar',
                 xAxisIndex: 0,
                 yAxisIndex: 0,
+                barGap: '-100%', // 使兩個柱狀圖重疊
                 data: legalPerson.data.FI,
                 itemStyle: {
                     color: fiUpColor  // 設置系列項目的顏色，這將影響 legend 中的 icon 顏色
+                }
+            },
+            {
+                name: '投信',
+                type: 'bar',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                data: legalPerson.data.IT,
+                itemStyle: {
+                    color: itUpColor
+                }
+            },
+            {
+                name: '自營商',
+                type: 'bar',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                data: legalPerson.data.DL,
+                itemStyle: {
+                    color: dlUpColor
                 }
             },
         ],
@@ -253,8 +358,6 @@ const setOption = () => {
                         width: 1         // 設置分隔線寬度
                     }
                 },
-                // min: 'dataMin',
-                // max: 'dataMax'
             },
 
         ],
@@ -285,6 +388,7 @@ const setOption = () => {
 }
 
 :deep(.duringSel .el-select__wrapper) {
+    color: #fff;
     background: transparent;
 }
 </style>
