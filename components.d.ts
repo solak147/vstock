@@ -26,6 +26,7 @@ declare module 'vue' {
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     HistoryChart: typeof import('./src/components/HistoryChart.vue')['default']
+    KChart: typeof import('./src/components/KChart.vue')['default']
     LegalPersonChart: typeof import('./src/components/LegalPersonChart.vue')['default']
     PttCard: typeof import('./src/components/PttCard.vue')['default']
     RealTimeChart: typeof import('./src/components/RealTimeChart.vue')['default']

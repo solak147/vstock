@@ -24,6 +24,8 @@
 
                 <PttCard symbol="IX0001" :style="{ order: order[3] }" class="mb-10"></PttCard>
 
+                <KChart symbol="IX0001" :style="{ order: order[4] }" @reOrder="reOrder" class="mb-10">
+                </KChart>
             </transition-group>
 
         </div>
@@ -39,13 +41,14 @@ import RealTimeChart from '@/components/RealTimeChart.vue'
 import HistoryChart from '@/components/HistoryChart.vue'
 import LegalPersonChart from '@/components/LegalPersonChart.vue'
 import PttCard from '@/components/PttCard.vue'
+import KChart from '@/components/KChart.vue'
 import API from '@/apis'
 import Utils from '@/utils'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
 const chart = ref(null)
-const order = ref([1, 2, 3, 4])
+const order = ref([1, 2, 3, 4, 5])
 const reOrder = (isBig, key) => {
     if (isBig) {
         order.value = order.value.map((item, k) => {
