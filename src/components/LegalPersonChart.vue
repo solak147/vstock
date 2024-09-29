@@ -69,7 +69,7 @@ onMounted(async () => {
     legalPerson.data.width = chart.value.getWidth()
 
     loading.value = true
-    let res = await API.Stock.getLegalPerson(props.symbol)
+    let res = await API.Stock.getFcnt('FCNT000005', props.symbol)
     legalPerson.data.originData = res.data.content.rawContent
 
     duringChg()

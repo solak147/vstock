@@ -26,20 +26,12 @@ export default class Stock {
     });
   }
 
-  //取得 三大法人
-  static async getLegalPerson (symbol: string | number) {
+  static async getFcnt (fcnt: string, symbol: string | number, timestamp_start?: string | number) {
     return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
-      symbol: symbol,
-      action: 'getLegalPerson'
-    });
-  }
-
-  //取得 Ptt文章
-  static async getPttArticle (symbol: string | number, timestamp_start: string | number) {
-    return get(`https://script.google.com/macros/s/AKfycbx3YfCrwKV4W6omR2W7_amxfazGQjndEMOxNUS8omsIn7jTfrruyDrAq3JZxpMp5YCEfA/exec`,{
-      symbol: symbol,
+      fcnt,
+      symbol,
       timestamp_start,
-      action: 'getPttArticle'
+       action: 'getFcnt'
     });
   }
   

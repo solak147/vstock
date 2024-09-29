@@ -52,7 +52,7 @@ const pageSize = ref(12)
 const weekFrom = ref(0)
 
 onMounted(async () => {
-    let res = await API.Stock.getPttArticle(props.symbol)
+    let res = await API.Stock.getFcnt('FCNT000073', props.symbol)
     pttArr.value = res.data.content.rawContent
 })
 
@@ -66,7 +66,7 @@ const nextClick = async () => {
     if (pttArr.value.length < currentPage.value * pageSize.value) {
         let date = new Date(pttArr.value[pttArr.value.length - 1].timestamp)
         date.setDate(date.getDate())
-        let res = await API.Stock.getPttArticle(props.symbol, date.getTime() - 1)
+        let res = await API.Stock.getFcnt('FCNT000073', props.symbol, date.getTime() - 1)
         pttArr.value = pttArr.value.concat(res.data.content.rawContent)
     }
 }
