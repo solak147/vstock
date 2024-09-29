@@ -49,17 +49,17 @@
     </div>
 </template>
 
-<script lang="ts" setup>
+<script setup>
 // import { useRouter } from 'vue-router'
 
 // const router = useRouter()
 
-const handleOpen = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
+const handleOpen = (key, keyPath) => {
+    // console.log(key, keyPath)
 }
 
-const handleClose = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
+const handleClose = (key, keyPath) => {
+    // console.log(key, keyPath)
 }
 
 const getUrl = () => {

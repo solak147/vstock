@@ -153,7 +153,7 @@ const setOption = () => {
                 end: 100
             },
             {
-                show: true,
+                show: false,
                 xAxisIndex: [0, 1],
                 type: 'slider',
                 top: '85%',
@@ -299,13 +299,13 @@ const setOption = () => {
             {
                 left: '10%',
                 right: '8%',
-                height: '50%'
+                height: '60%'
             },
             {
                 left: '10%',
                 right: '8%',
-                top: '63%',
-                height: '16%'
+                top: '75%',
+                height: '20%'
             },
         ],
         xAxis: [
@@ -404,13 +404,13 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 
 <style scoped>
 .chart {
-    height: 500px;
+    height: 400px;
     width: 40vw;
     transition: width 1s ease;
 }
 
 .chartBig {
-    height: 500px;
+    height: 400px;
     width: 80vw;
     transition: width 1s ease;
 }

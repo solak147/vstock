@@ -118,7 +118,7 @@ const setOption = () => {
                 end: 100
             },
             {
-                show: true,
+                show: false,
                 xAxisIndex: [0, 1],
                 type: 'slider',
                 top: '85%',
@@ -159,17 +159,17 @@ const setOption = () => {
             {
                 left: '10%',
                 right: '8%',
-                height: '65%'
+                height: '75%'
             },
             {
                 left: '10%',
                 right: '8%',
-                height: '65%'
+                height: '75%'
             },
             {
                 left: '10%',
                 right: '8%',
-                height: '65%'
+                height: '75%'
             },
         ],
         xAxis: [
@@ -198,18 +198,17 @@ const setOption = () => {
                 },
                 min: (value) => {
                     if (value.min > candles.data.lastClose) {
-                        return (candles.data.lastClose * 0.99).toFixed(0)
+                        return (candles.data.lastClose * 0.9).toFixed(0)
                     } else {
-
-                        return (value.min * 0.99).toFixed(0)
+                        return (value.min * 0.9).toFixed(0)
                     }
                 },
 
                 max: (value) => {
                     if (value.max > candles.data.lastClose) {
-                        return (value.max * 1.01).toFixed(0)
+                        return (value.max * 1.1).toFixed(0)
                     } else {
-                        return (candles.data.lastClose * 1.01).toFixed(0)
+                        return (candles.data.lastClose * 1).toFixed(0)
                     }
                 },
             },
@@ -310,13 +309,13 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 
 <style scoped>
 .chart {
-    height: 500px;
+    height: 400px;
     width: 40vw;
     transition: width 1s ease;
 }
 
 .chartBig {
-    height: 500px;
+    height: 400px;
     width: 80vw;
     transition: width 1s ease;
 }

@@ -19,9 +19,10 @@
                     @chgLegend="chgHistoryLegend" class="mb-10">
                 </HistoryChart>
 
-                <LegalPersonChart symbol="IX0001" :style="{ order: order[2] }"></LegalPersonChart>
+                <LegalPersonChart symbol="IX0001" :style="{ order: order[2] }" @reOrder="reOrder" class="mb-10">
+                </LegalPersonChart>
 
-                <PttCard symbol="IX0001" :style="{ order: order[3] }"></PttCard>
+                <PttCard symbol="IX0001" :style="{ order: order[3] }" class="mb-10"></PttCard>
 
             </transition-group>
 
@@ -47,8 +48,16 @@ const chart = ref(null)
 const order = ref([1, 2, 3, 4])
 const reOrder = (isBig, key) => {
     if (isBig) {
-        order.value = order.value.map(item => item + 1)
-        order.value[key] = 1
+        order.value = order.value.map((item, k) => {
+            if (k < key) {
+                return item + 1
+            } else if (k == key) {
+                return 1
+            } else {
+                return item
+            }
+        })
+        console.log(order.value)
     }
 }
 

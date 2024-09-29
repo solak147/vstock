@@ -20,10 +20,9 @@ const router = createRouter({
 
 // 导航守卫
 router.beforeEach((to, from, next) => {
-  console.log(from)
   const isAuthenticated = localStorage.getItem('authToken');
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && from) {
       // baseStore().actions_showLogin(true)
     } else {
       next();

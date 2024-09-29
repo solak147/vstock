@@ -23,6 +23,7 @@ const props = defineProps({
     },
 })
 
+const emit = defineEmits(['reOrder'])
 const chart = ref(null)
 const option = ref(null)
 const loading = ref(false)
@@ -52,9 +53,12 @@ const dlDownColor = '#64A0DD66'
 let legalPerson = reactive({
     data: {
         isBig: false,    //是否放大
+        width: '',
 
         originData: {},
         category: [],
+        currentSel: {},
+
         FI: [],  //外資
         IT: [],  //投信
         DL: [],  //自營商
@@ -62,6 +66,8 @@ let legalPerson = reactive({
 })
 
 onMounted(async () => {
+    legalPerson.data.width = chart.value.getWidth()
+
     loading.value = true
     let res = await API.Stock.getLegalPerson(props.symbol)
     legalPerson.data.originData = res.data.content.rawContent
@@ -211,10 +217,11 @@ const setOption = () => {
 
                     onclick: function () {
                         chart.value.resize({
-                            width: candles.data.isBig ? candles.data.width : candles.data.width * 2,
+                            width: legalPerson.data.isBig ? legalPerson.data.width : legalPerson.data.width * 2,
                         })
-                        candles.data.isBig = !candles.data.isBig
-                        emit('reOrder', candles.data.isBig, 0)
+
+                        legalPerson.data.isBig = !legalPerson.data.isBig
+                        emit('reOrder', legalPerson.data.isBig, 2,)
                     }
                 }
             }
@@ -285,6 +292,7 @@ const setOption = () => {
         ],
         legend: {
             top: 10,
+            selected: legalPerson.data.currentSel,
             data: ['外資', '投信', '自營商'],
         },
 
@@ -325,7 +333,7 @@ const setOption = () => {
             {
                 left: '10%',
                 right: '8%',
-                height: '50%'
+                height: '75%'
             },
         ],
         xAxis: [
@@ -364,17 +372,22 @@ const setOption = () => {
     }
 }
 
+const legendselectchanged = (params) => {
+    legalPerson.data.currentSel = params.selected
+    chart.value.resize()
+}
+
 </script>
 
 <style scoped>
 .chart {
-    height: 500px;
+    height: 400px;
     width: 40vw;
     transition: width 1s ease;
 }
 
 .chartBig {
-    height: 500px;
+    height: 400px;
     width: 80vw;
     transition: width 1s ease;
 }

@@ -45,7 +45,7 @@ onMounted(async () => {
         indexStore.candles.data = data.data
       }
 
-      console.log(data);
+      // console.log(data);
     };
   };
 
