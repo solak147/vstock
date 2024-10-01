@@ -10,7 +10,7 @@
                 '+' : '-'}${candles.data.percent}%` }}</div>
         </div>
 
-        <div class="flex justify-around flex-wrap">
+        <div class="flex justify-around flex-wrap items-center">
             <transition-group name="fade">
                 <RealTimeChart :candles="candles" :style="{ order: order[0] }" @reOrder="reOrder" class="mb-10">
                 </RealTimeChart>
@@ -26,6 +26,7 @@
 
                 <KChart symbol="IX0001" :style="{ order: order[4] }" @reOrder="reOrder" class="mb-10">
                 </KChart>
+
             </transition-group>
 
         </div>
@@ -172,8 +173,8 @@ const serHistoryCandles = async (during) => {
     }
 
     res = await API.Stock.getStockHistory('IX0001', 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-    candlesHistory.data.trend = res.data.map(item => { return { value: [item.date, item.close] } }).reverse()
-    candlesHistory.data.category = res.data.map(item => item.date).reverse()
+    candlesHistory.data.trend = res.data.map(item => { return { value: [item.date, item.close] } })
+    candlesHistory.data.category = res.data.map(item => item.date)
 
     nowDate = new Date()
     lastDate = new Date()

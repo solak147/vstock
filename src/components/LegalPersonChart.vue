@@ -1,5 +1,5 @@
 <template>
-    <div class="relative">
+    <div class="relative h-fit">
 
         <v-chart ref="chart" :class="{ chart: !legalPerson.data?.isBig, chartBig: legalPerson.data?.isBig, }"
             :option="option" :loading="loading" @legendselectchanged="legendselectchanged" autoresize />

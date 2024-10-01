@@ -15,6 +15,7 @@ import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { CandlestickChart, BarChart, LineChart, TreemapChart  } from 'echarts/charts';
 import {
+  GraphicComponent,
   ToolboxComponent,
   MarkPointComponent,
   MarkLineComponent,
@@ -38,6 +39,7 @@ use([
   TitleComponent,
   TooltipComponent,
   LegendComponent,
+  GraphicComponent,
 
   LineChart,
   BarChart,

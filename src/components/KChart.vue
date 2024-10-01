@@ -26,6 +26,55 @@ const upColor = '#FF5B5B';
 const upBorderColor = '#ff3737';
 const downColor = '#91F840';
 const downBorderColor = '#6fda1a';
+const ma5Color = '#E5C362'
+const ma10Color = '#EE8379'
+const ma20Color = '#64A0DD'
+const ma60Color = '#49B8BB'
+
+const ma5Txt = reactive({
+    type: 'text',
+    left: 10,
+    top: 40,
+    style: {
+        text: '5MA：',
+        font: '14px sans-serif',
+        fill: ma5Color
+    }
+},)
+
+const ma10Txt = reactive({
+    type: 'text',
+    left: 110,
+    top: 40,
+    style: {
+        text: '10MA：',
+        font: '14px sans-serif',
+        fill: ma10Color
+    }
+},)
+
+const ma20Txt = reactive({
+    type: 'text',
+    left: 220,
+    top: 40,
+    style: {
+        text: '20MA：',
+        font: '14px sans-serif',
+        fill: ma20Color
+    }
+},)
+
+const ma60Txt = reactive({
+    type: 'text',
+    left: 330,
+    top: 40,
+    style: {
+        text: '60MA：',
+        font: '14px sans-serif',
+        fill: ma60Color
+    }
+},)
+
 const duringOptions = [
     {
         value: '1Y',
@@ -44,15 +93,18 @@ const duringOptions = [
 const chart = ref()
 const option = ref()
 const loading = ref(false)
-const duringModel = ref('1Y')
+const duringModel = ref('6M')
 const fiveYearClose = ref([])
 let candles = reactive({
     data: {
         isBig: false,    //是否放大
         width: '',
 
-        originData: {},
         list: [],
+        trend5: [],
+        trend10: [],
+        trend20: [],
+        trend60: [],
         category: [],
         currentSel: {},
     }
@@ -62,27 +114,74 @@ onMounted(async () => {
     candles.data.width = chart.value.getWidth()
 
     loading.value = true
-    let res = await API.Stock.getFcnt('FCNT000099', props.symbol)
-    candles.data.originData = res.data.content.rawContent.day
 
-    res = await API.Stock.getFcnt('FCNT000039', props.symbol)
-    fiveYearClose.value = res.data.content.rawContent.reverse()
-    console.log(res)
-
+    let nowDate = new Date()
     let lastDate = new Date()
+    let maDate = new Date()
 
     if (duringModel.value == '1Y') {
-        lastDate.setFullYear(lastDate.getFullYear() - 1)
+        lastDate.setFullYear(nowDate.getFullYear() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+
+        maDate.setFullYear(nowDate.getFullYear() - 1)
+        maDate.setDate(maDate.getDate() - 120)
     } else if (duringModel.value == '6M') {
-        lastDate.setMonth(lastDate.getMonth() - 6)
+        lastDate.setMonth(nowDate.getMonth() - 6)
+        lastDate.setDate(lastDate.getDate() + 1)
+
+        maDate.setMonth(nowDate.getMonth() - 6)
+        maDate.setDate(maDate.getDate() - 120)
     } else if (duringModel.value == '1M') {
-        lastDate.setMonth(lastDate.getMonth() - 1)
+        lastDate.setMonth(nowDate.getMonth() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+
+        maDate.setMonth(nowDate.getMonth() - 1)
+        maDate.setDate(maDate.getDate() - 120)
     }
 
-    let tmpData = candles.data.originData.filter(item => new Date(item.date) > lastDate)
+    let res = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    candles.data.list = res.data.map(item => [item.open, item.close, item.low, item.high, item.change])
+    candles.data.category = res.data.map(item => item.date)
+    candles.data.trend = res.data.map(item => { return { value: [item.date, item.close] } })
 
-    candles.data.list = tmpData.map(item => [item.open, item.close, item.low, item.high, item.change, item.change_rate, item.volumeOrAmount])
-    candles.data.category = tmpData.map(item => Utils.dateFormate(item.date, 'yymmdd'))
+    let resMa = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(maDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    const delKey = resMa.data.findIndex(item => item.date === candles.data.category[0])
+    candles.data.trend5 = resMa.data.map(item => item.close)
+    candles.data.trend5 = calculateMA(candles.data.trend5, 5)
+    candles.data.trend5.splice(0, delKey)
+
+    candles.data.trend10 = resMa.data.map(item => item.close)
+    candles.data.trend10 = calculateMA(candles.data.trend10, 10)
+    candles.data.trend10.splice(0, delKey)
+
+    candles.data.trend20 = resMa.data.map(item => item.close)
+    candles.data.trend20 = calculateMA(candles.data.trend20, 20)
+    candles.data.trend20.splice(0, delKey)
+
+    candles.data.trend60 = resMa.data.map(item => item.close)
+    candles.data.trend60 = calculateMA(candles.data.trend60, 60)
+    candles.data.trend60.splice(0, delKey)
+
+    let resClose = await API.Stock.getFcnt('FCNT000039', props.symbol)
+    fiveYearClose.value = resClose.data.content.rawContent.reverse()
+    let previousVol = fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < candles.data.category[0]).close
+
+    candles.data.volume = res.data.map((item, key) => {
+
+        let color = 1
+        if (previousVol) {
+            if (item.close > previousVol) {
+                color = 1
+            } else {
+                color = -1
+            }
+        }
+
+        previousVol = item.close
+
+        return [key, item.volume, color]
+    })
+
 
     setOption()
     loading.value = false
@@ -101,6 +200,11 @@ const setOption = () => {
                 fontWeight: 'normal',
             }
         },
+        graphic: {
+            elements: [
+                ma5Txt, ma10Txt, ma20Txt, ma60Txt
+            ]
+        },
         tooltip: {
             trigger: 'axis',
             axisPointer: {
@@ -111,10 +215,33 @@ const setOption = () => {
                 color: '#FFF',
             },
             formatter: function (params) {
+
                 let k = params.filter(item => item.seriesIndex == 0)[0]
+                let ma5 = params.filter(item => item.seriesIndex == 2)[0]
+                let ma10 = params.filter(item => item.seriesIndex == 3)[0]
+                let ma20 = params.filter(item => item.seriesIndex == 4)[0]
+                let ma60 = params.filter(item => item.seriesIndex == 5)[0]
 
                 let lastClosePrice = candles.data.list[k.dataIndex - 1] ? candles.data.list[k.dataIndex - 1][1]
                     : fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < k.axisValue).close //上一K棒收價
+                let up = (k.value[2] - lastClosePrice).toFixed(2)
+                let percent = (up / lastClosePrice * 100).toFixed(2)
+
+                if (ma5) {
+                    ma5Txt.style.text = '5MA:' + ma5.value
+                }
+
+                if (ma10) {
+                    ma10Txt.style.text = '10MA:' + ma10.value
+                }
+
+                if (ma20) {
+                    ma20Txt.style.text = '20MA:' + ma20.value
+                }
+
+                if (ma60) {
+                    ma60Txt.style.text = '60MA:' + ma60.value
+                }
 
                 return `<div style=" text-align: left;">
                     ${params[0].name} <br/>
@@ -122,8 +249,8 @@ const setOption = () => {
                     <span style="color:${setTooltipColor(k.value[2], lastClosePrice)}">收 :<span style="margin-left: 10px">${k.value[2]}</span></span><br/>
                     <span style="color:${setTooltipColor(k.value[3], lastClosePrice)}">低 :<span style="margin-left: 10px">${k.value[3]}</span></span><br/>
                     <span style="color:${setTooltipColor(k.value[4], lastClosePrice)}">高 :<span style="margin-left: 10px">${k.value[4]}</span></span><br/> 
-                    <span style="color:${setTooltipColor(k.value[5])}">${k.value[5] > 0 ? '漲' : '跌'} :<span style="margin-left: 10px">${k.value[5]}</span></span><br/>
-                    <span style="color:${setTooltipColor(k.value[5])}">幅 :<span style="margin-left: 10px">${k.value[6]}%</span></span><br/>
+                    <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 10px">${up > 0 ? '+' + up : up}</span></span><br/>
+                    <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 10px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
                     量 :<span style="margin-left: 10px">${(k.value[7] / 100000000).toFixed(3)}億元</span><br/> 
                 </div>`;
 
@@ -241,18 +368,74 @@ const setOption = () => {
                 yAxisIndex: 1,
                 data: candles.data.volume
             },
-
+            {
+                name: 'MA5',
+                type: 'line',
+                data: candles.data.trend5,
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    opacity: 0.5,
+                    color: ma5Color
+                },
+                itemStyle: {
+                    color: ma5Color
+                },
+            },
+            {
+                name: 'MA10',
+                type: 'line',
+                data: candles.data.trend10,
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    opacity: 0.5,
+                    color: ma10Color
+                },
+                itemStyle: {
+                    color: ma10Color
+                },
+            },
+            {
+                name: 'MA20',
+                type: 'line',
+                data: candles.data.trend20,
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    opacity: 0.5,
+                    color: ma20Color
+                },
+                itemStyle: {
+                    color: ma20Color
+                },
+            },
+            {
+                name: 'MA60',
+                type: 'line',
+                data: candles.data.trend60,
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    opacity: 0.5,
+                    color: ma60Color
+                },
+                itemStyle: {
+                    color: ma60Color
+                },
+            },
         ],
         grid: [
             {
                 left: '10%',
                 right: '8%',
-                height: '60%'
+                top: '12%',
+                height: '50%'
             },
             {
                 left: '10%',
                 right: '8%',
-                top: '75%',
+                top: '60%',
                 height: '20%'
             },
         ],
@@ -293,11 +476,11 @@ const setOption = () => {
                     }
                 },
                 min: (value) => {
-                    return value.min
+                    return (value.min * 0.95).toFixed(0)
                 },
 
                 max: (value) => {
-                    return value.max
+                    return (value.max * 1.05).toFixed(0)
                 },
             },
             {
@@ -312,6 +495,22 @@ const setOption = () => {
 
         ],
     }
+}
+
+const calculateMA = (data, dayCount) => {
+    let result = [];
+    for (let i = 0, len = data.length; i < len; i++) {
+        if (i < dayCount) {
+            result.push('-');
+            continue;
+        }
+        var sum = 0;
+        for (let j = 0; j < dayCount; j++) {
+            sum += +data[i - j];
+        }
+        result.push((sum / dayCount).toFixed(2));
+    }
+    return result;
 }
 
 const setTooltipColor = (closePrice, lastClosePrice = 0) => {
@@ -329,13 +528,13 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 
 <style scoped>
 .chart {
-    height: 400px;
+    height: 600px;
     width: 40vw;
     transition: width 1s ease;
 }
 
 .chartBig {
-    height: 400px;
+    height: 600px;
     width: 80vw;
     transition: width 1s ease;
 }
