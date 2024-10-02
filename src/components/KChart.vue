@@ -107,6 +107,8 @@ let candles = reactive({
         trend60: [],
         category: [],
         currentSel: {},
+
+        kdData: {},
     }
 })
 
@@ -140,11 +142,13 @@ onMounted(async () => {
     }
 
     let res = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    res.data = res.data.reverse()
     candles.data.list = res.data.map(item => [item.open, item.close, item.low, item.high, item.change])
     candles.data.category = res.data.map(item => item.date)
     candles.data.trend = res.data.map(item => { return { value: [item.date, item.close] } })
 
     let resMa = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(maDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    resMa.data = resMa.data.reverse()
     const delKey = resMa.data.findIndex(item => item.date === candles.data.category[0])
     candles.data.trend5 = resMa.data.map(item => item.close)
     candles.data.trend5 = calculateMA(candles.data.trend5, 5)
@@ -182,7 +186,15 @@ onMounted(async () => {
         return [key, item.volume, color]
     })
 
+    let kdParam = {
+        closingPrices: resMa.data.map(item => item.close),
+        highPrices: resMa.data.map(item => item.high),
+        lowPrices: resMa.data.map(item => item.low),
+    }
 
+    candles.data.kdData = calculateKD(kdParam.closingPrices, kdParam.highPrices, kdParam.lowPrices)
+    candles.data.kdData.k.splice(0, delKey)
+    console.log(candles.data.kdData.k)
     setOption()
     loading.value = false
 })
@@ -424,6 +436,17 @@ const setOption = () => {
                     color: ma60Color
                 },
             },
+            {
+                name: 'K线',
+                type: 'line',
+                xAxisIndex: 2,
+                yAxisIndex: 2,
+                data: candles.data.kdData.k,
+                smooth: true,
+                lineStyle: {
+                    color: 'blue'
+                }
+            },
         ],
         grid: [
             {
@@ -437,6 +460,12 @@ const setOption = () => {
                 right: '8%',
                 top: '60%',
                 height: '20%'
+            },
+            {
+                left: '10%',
+                right: '8%',
+                top: '80%',
+                height: '15%'
             },
         ],
         xAxis: [
@@ -452,6 +481,18 @@ const setOption = () => {
             {
                 type: 'category',
                 gridIndex: 1,
+                data: candles.data.category,
+                boundaryGap: false,
+                axisLine: { onZero: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                min: 'dataMin',
+                max: 'dataMax'
+            },
+            {
+                type: 'category',
+                gridIndex: 2,
                 data: candles.data.category,
                 boundaryGap: false,
                 axisLine: { onZero: false },
@@ -492,6 +533,24 @@ const setOption = () => {
                 axisTick: { show: false },
                 splitLine: { show: false }
             },
+            {
+                scale: true,
+                gridIndex: 2,
+                axisLabel: {
+                    formatter: function (value) {
+                        if (value === 20 || value === 50 || value === 80) {
+                            return value;
+                        }
+                        return '';
+                    }
+                },
+                min: 0,
+                max: 100,
+                interval: 10,  //调整刻度间隔
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false }
+            },
 
         ],
     }
@@ -513,6 +572,29 @@ const calculateMA = (data, dayCount) => {
     return result;
 }
 
+const calculateKD = (closingPrices, highPrices, lowPrices, periodK = 9, periodD = 9) => {
+    var rsv = [];
+    var k = [];
+    var d = [];
+
+    for (var i = 0; i < closingPrices.length; i++) {
+        var recentHigh = Math.max(...highPrices.slice(Math.max(0, i - periodK + 1), i + 1));
+        var recentLow = Math.min(...lowPrices.slice(Math.max(0, i - periodK + 1), i + 1));
+        var currentRSV = (closingPrices[i] - recentLow) / (recentHigh - recentLow) * 100;
+        rsv.push(currentRSV);
+
+        if (i === 0) {
+            k.push(currentRSV);
+            d.push(currentRSV);
+        } else {
+            k.push(k[i - 1] * 2 / 3 + currentRSV * 1 / 3);
+            d.push(d[i - 1] * 2 / 3 + k[i] * 1 / 3);
+        }
+    }
+
+    return { k, d };
+}
+
 const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     if (closePrice == lastClosePrice) {
         return
@@ -528,13 +610,13 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 
 <style scoped>
 .chart {
-    height: 600px;
+    height: 700px;
     width: 40vw;
     transition: width 1s ease;
 }
 
 .chartBig {
-    height: 600px;
+    height: 700px;
     width: 80vw;
     transition: width 1s ease;
 }
