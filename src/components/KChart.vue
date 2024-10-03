@@ -75,6 +75,28 @@ const ma60Txt = reactive({
     }
 },)
 
+const k9Txt = reactive({
+    type: 'text',
+    left: 60,
+    top: 580,
+    style: {
+        text: 'K9：',
+        font: '14px sans-serif',
+        fill: ma10Color
+    }
+},)
+
+const d9Txt = reactive({
+    type: 'text',
+    left: 130,
+    top: 580,
+    style: {
+        text: 'D9：',
+        font: '14px sans-serif',
+        fill: ma20Color
+    }
+},)
+
 const duringOptions = [
     {
         value: '1Y',
@@ -194,6 +216,7 @@ onMounted(async () => {
 
     candles.data.kdData = calculateKD(kdParam.closingPrices, kdParam.highPrices, kdParam.lowPrices)
     candles.data.kdData.k.splice(0, delKey)
+    candles.data.kdData.d.splice(0, delKey)
     console.log(candles.data.kdData.k)
     setOption()
     loading.value = false
@@ -214,7 +237,8 @@ const setOption = () => {
         },
         graphic: {
             elements: [
-                ma5Txt, ma10Txt, ma20Txt, ma60Txt
+                ma5Txt, ma10Txt, ma20Txt, ma60Txt,
+                k9Txt, d9Txt
             ]
         },
         tooltip: {
@@ -233,6 +257,8 @@ const setOption = () => {
                 let ma10 = params.filter(item => item.seriesIndex == 3)[0]
                 let ma20 = params.filter(item => item.seriesIndex == 4)[0]
                 let ma60 = params.filter(item => item.seriesIndex == 5)[0]
+                let k9 = params.filter(item => item.seriesIndex == 6)[0]
+                let d9 = params.filter(item => item.seriesIndex == 7)[0]
 
                 let lastClosePrice = candles.data.list[k.dataIndex - 1] ? candles.data.list[k.dataIndex - 1][1]
                     : fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < k.axisValue).close //上一K棒收價
@@ -254,6 +280,15 @@ const setOption = () => {
                 if (ma60) {
                     ma60Txt.style.text = '60MA:' + ma60.value
                 }
+
+                if (k9) {
+                    k9Txt.style.text = 'K9:' + k9.value.toFixed(2)
+                }
+
+                if (d9) {
+                    d9Txt.style.text = 'D9:' + d9.value.toFixed(2)
+                }
+
 
                 return `<div style=" text-align: left;">
                     ${params[0].name} <br/>
@@ -437,14 +472,39 @@ const setOption = () => {
                 },
             },
             {
-                name: 'K线',
+                name: 'K線',
                 type: 'line',
                 xAxisIndex: 2,
                 yAxisIndex: 2,
                 data: candles.data.kdData.k,
                 smooth: true,
                 lineStyle: {
-                    color: 'blue'
+                    color: ma20Color
+                },
+                markLine: {
+                    label: {
+                        show: false
+                    },
+                    symbol: ['none', 'none'],
+                    data: [
+                        { yAxis: 20, name: '固定值 20' },
+                        { yAxis: 50, name: '固定值 50' },
+                        { yAxis: 80, name: '固定值 80' },
+                    ],
+                    lineStyle: {
+                        color: '#4d4d4d',
+                    }
+                },
+            },
+            {
+                name: 'D線',
+                type: 'line',
+                xAxisIndex: 2,
+                yAxisIndex: 2,
+                data: candles.data.kdData.d,
+                smooth: true,
+                lineStyle: {
+                    color: ma10Color
                 }
             },
         ],
@@ -464,7 +524,7 @@ const setOption = () => {
             {
                 left: '10%',
                 right: '8%',
-                top: '80%',
+                top: '85%',
                 height: '15%'
             },
         ],
