@@ -1,16 +1,32 @@
 <template>
-    <div>
+    <div class="relative">
         <v-chart ref="chart" :class="{ chart: !candles.data?.isBig, chartBig: candles.data?.isBig, }" :option="option"
             :loading="loading" @legendselectchanged="legendselectchanged" autoresize />
 
-        <el-select v-model="duringModel" placeholder="Select" size="small" class="duringSel" @change="duringChg">
-            <el-option v-for="item in duringOptions" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
+        <div v-if="maTxt.ma5" class="flex maWrap">
+            <div :style="`color:${ma5Color}`" class="w-110 text-left">5MA：{{ maTxt.ma5 }}</div>
+            <div :style="`color:${ma10Color}`" class="w-110 text-left">5MA：{{ maTxt.ma10 }}</div>
+            <div :style="`color:${ma20Color}`" class="w-110 text-left">5MA：{{ maTxt.ma20 }}</div>
+            <div :style="`color:${ma60Color}`" class="w-110 text-left">5MA：{{ maTxt.ma60 }}</div>
+        </div>
+
+
+        <div v-if="kdTxt.k9" class="flex kdWrap">
+            <div :style="`color:${ma10Color}`" class="w-80 text-left">K9：{{ kdTxt.k9 }}</div>
+            <div :style="`color:${ma20Color}`" class="w-80 text-left">D9：{{ kdTxt.d9 }}</div>
+        </div>
+
+        <div v-if="macdTxt.dif" class="flex macdWrap">
+            <div :style="`color:${ma5Color}`" class="w-80 text-left">DIF：{{ macdTxt.dif }}</div>
+            <div :style="`color:${ma20Color}`" class="w-100 text-left">MACD：{{ macdTxt.macd }}</div>
+            <div :style="`color:${upColor}`" class="w-100 text-left">D-M：{{ macdTxt.dm }}</div>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
+import { useIndexStore } from '@/store/modules/index.js'
 import VChart, { THEME_KEY } from 'vue-echarts'
 import API from '@/apis'
 import Utils from '@/utils'
@@ -31,71 +47,24 @@ const ma10Color = '#EE8379'
 const ma20Color = '#64A0DD'
 const ma60Color = '#49B8BB'
 
-const ma5Txt = reactive({
-    type: 'text',
-    left: 10,
-    top: 40,
-    style: {
-        text: '5MA：',
-        font: '14px sans-serif',
-        fill: ma5Color
-    }
-},)
+const maTxt = reactive({
+    ma5: '',
+    ma10: '',
+    ma20: '',
+    ma60: '',
+})
 
-const ma10Txt = reactive({
-    type: 'text',
-    left: 110,
-    top: 40,
-    style: {
-        text: '10MA：',
-        font: '14px sans-serif',
-        fill: ma10Color
-    }
-},)
+const kdTxt = reactive({
+    k9: '',
+    d9: '',
+})
 
-const ma20Txt = reactive({
-    type: 'text',
-    left: 220,
-    top: 40,
-    style: {
-        text: '20MA：',
-        font: '14px sans-serif',
-        fill: ma20Color
-    }
-},)
+const macdTxt = reactive({
+    dif: '',
+    macd: '',
+    dm: '',
+})
 
-const ma60Txt = reactive({
-    type: 'text',
-    left: 330,
-    top: 40,
-    style: {
-        text: '60MA：',
-        font: '14px sans-serif',
-        fill: ma60Color
-    }
-},)
-
-const k9Txt = reactive({
-    type: 'text',
-    left: 60,
-    top: 580,
-    style: {
-        text: 'K9：',
-        font: '14px sans-serif',
-        fill: ma10Color
-    }
-},)
-
-const d9Txt = reactive({
-    type: 'text',
-    left: 130,
-    top: 580,
-    style: {
-        text: 'D9：',
-        font: '14px sans-serif',
-        fill: ma20Color
-    }
-},)
 
 const duringOptions = [
     {
@@ -112,6 +81,7 @@ const duringOptions = [
     },
 ]
 
+const indexStore = useIndexStore()
 const chart = ref()
 const option = ref()
 const loading = ref(false)
@@ -131,6 +101,7 @@ let candles = reactive({
         currentSel: {},
 
         kdData: {},
+        macdData: {},
     }
 })
 
@@ -142,6 +113,7 @@ onMounted(async () => {
     let nowDate = new Date()
     let lastDate = new Date()
     let maDate = new Date()
+    let delKey
 
     if (duringModel.value == '1Y') {
         lastDate.setFullYear(nowDate.getFullYear() - 1)
@@ -171,7 +143,7 @@ onMounted(async () => {
 
     let resMa = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(maDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
     resMa.data = resMa.data.reverse()
-    const delKey = resMa.data.findIndex(item => item.date === candles.data.category[0])
+    delKey = resMa.data.findIndex(item => item.date === candles.data.category[0])
     candles.data.trend5 = resMa.data.map(item => item.close)
     candles.data.trend5 = calculateMA(candles.data.trend5, 5)
     candles.data.trend5.splice(0, delKey)
@@ -217,7 +189,17 @@ onMounted(async () => {
     candles.data.kdData = calculateKD(kdParam.closingPrices, kdParam.highPrices, kdParam.lowPrices)
     candles.data.kdData.k.splice(0, delKey)
     candles.data.kdData.d.splice(0, delKey)
-    console.log(candles.data.kdData.k)
+
+    candles.data.macdData.dif = indexStore.tec5Years.data.day.map(item => item.ema12 - item.ema26)
+    candles.data.macdData.dea = indexStore.tec5Years.data.day.map(item => item.ema12_26)
+    candles.data.macdData.macd = indexStore.tec5Years.data.day.map(item => item.osc)
+
+
+    delKey = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') === candles.data.category[0])
+    candles.data.macdData.dif.splice(0, delKey)
+    candles.data.macdData.dea.splice(0, delKey)
+    candles.data.macdData.macd.splice(0, delKey)
+
     setOption()
     loading.value = false
 })
@@ -237,8 +219,16 @@ const setOption = () => {
         },
         graphic: {
             elements: [
-                ma5Txt, ma10Txt, ma20Txt, ma60Txt,
-                k9Txt, d9Txt
+                // {
+                //     type: 'text',
+                //     left: 330,
+                //     top: 40,
+                //     style: {
+                //         text: '60MA：',
+                //         font: '14px sans-serif',
+                //         fill: ma60Color
+                //     }
+                // },
             ]
         },
         tooltip: {
@@ -259,6 +249,9 @@ const setOption = () => {
                 let ma60 = params.filter(item => item.seriesIndex == 5)[0]
                 let k9 = params.filter(item => item.seriesIndex == 6)[0]
                 let d9 = params.filter(item => item.seriesIndex == 7)[0]
+                let macd = params.filter(item => item.seriesIndex == 8)[0]
+                let dif = params.filter(item => item.seriesIndex == 9)[0]
+                let dea = params.filter(item => item.seriesIndex == 10)[0]
 
                 let lastClosePrice = candles.data.list[k.dataIndex - 1] ? candles.data.list[k.dataIndex - 1][1]
                     : fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < k.axisValue).close //上一K棒收價
@@ -266,29 +259,22 @@ const setOption = () => {
                 let percent = (up / lastClosePrice * 100).toFixed(2)
 
                 if (ma5) {
-                    ma5Txt.style.text = '5MA:' + ma5.value
-                }
-
-                if (ma10) {
-                    ma10Txt.style.text = '10MA:' + ma10.value
-                }
-
-                if (ma20) {
-                    ma20Txt.style.text = '20MA:' + ma20.value
-                }
-
-                if (ma60) {
-                    ma60Txt.style.text = '60MA:' + ma60.value
+                    maTxt.ma5 = ma5.value
+                    maTxt.ma10 = ma10.value
+                    maTxt.ma20 = ma20.value
+                    maTxt.ma60 = ma60.value
                 }
 
                 if (k9) {
-                    k9Txt.style.text = 'K9:' + k9.value.toFixed(2)
+                    kdTxt.k9 = k9.value.toFixed(2)
+                    kdTxt.d9 = d9.value.toFixed(2)
                 }
 
-                if (d9) {
-                    d9Txt.style.text = 'D9:' + d9.value.toFixed(2)
+                if (macd) {
+                    macdTxt.dif = dif.value.toFixed(2)
+                    macdTxt.macd = macd.value.toFixed(2)
+                    macdTxt.dm = (dif.value - macd.value).toFixed(2)
                 }
-
 
                 return `<div style=" text-align: left;">
                     ${params[0].name} <br/>
@@ -345,13 +331,13 @@ const setOption = () => {
         dataZoom: [
             {
                 type: 'inside',
-                xAxisIndex: [0, 1],
+                xAxisIndex: [0, 1, 2, 3],
                 start: 0,
                 end: 100
             },
             {
                 show: false,
-                xAxisIndex: [0, 1],
+                xAxisIndex: [0, 1, 2, 3],
                 type: 'slider',
                 top: '85%',
                 start: 0,
@@ -371,6 +357,21 @@ const setOption = () => {
                     {
                         value: 1,
                         color: upColor
+                    }
+                ]
+            },
+            {
+                show: false,
+                seriesIndex: 8,
+                dimension: 1,
+                pieces: [
+                    {
+                        gt: 0,
+                        color: upColor
+                    },
+                    {
+                        lte: 0,
+                        color: downColor
                     }
                 ]
             },
@@ -507,29 +508,65 @@ const setOption = () => {
                     color: ma10Color
                 }
             },
+            {
+                name: 'MACD',
+                type: 'bar',
+                xAxisIndex: 3,
+                yAxisIndex: 3,
+                data: candles.data.macdData.macd
+            },
+            {
+                name: 'DIF',
+                type: 'line',
+                xAxisIndex: 3,
+                yAxisIndex: 3,
+                data: candles.data.macdData.dif,
+                smooth: true,
+                lineStyle: {
+                    color: ma5Color
+                }
+            },
+            {
+                name: 'DEA',
+                type: 'line',
+                xAxisIndex: 3,
+                yAxisIndex: 3,
+                data: candles.data.macdData.dea,
+                smooth: true,
+                lineStyle: {
+                    color: ma20Color
+                }
+            },
         ],
         grid: [
             {
                 left: '10%',
                 right: '8%',
-                top: '12%',
-                height: '50%'
+                top: '8%',
+                height: '30%'
             },
             {
                 left: '10%',
                 right: '8%',
-                top: '60%',
-                height: '20%'
+                top: '37%',
+                height: '15%'
             },
             {
                 left: '10%',
                 right: '8%',
-                top: '85%',
+                top: '55%',
+                height: '15%'
+            },
+            {
+                left: '10%',
+                right: '8%',
+                top: '75%',
                 height: '15%'
             },
         ],
         xAxis: [
             {
+                scale: true,
                 type: 'category',
                 data: candles.data.category,
                 boundaryGap: false,
@@ -539,6 +576,7 @@ const setOption = () => {
                 max: 'dataMax',
             },
             {
+                scale: true,
                 type: 'category',
                 gridIndex: 1,
                 data: candles.data.category,
@@ -551,8 +589,22 @@ const setOption = () => {
                 max: 'dataMax'
             },
             {
+                scale: true,
                 type: 'category',
                 gridIndex: 2,
+                data: candles.data.category,
+                boundaryGap: false,
+                axisLine: { onZero: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                min: 'dataMin',
+                max: 'dataMax'
+            },
+            {
+                scale: true,
+                type: 'category',
+                gridIndex: 3,
                 data: candles.data.category,
                 boundaryGap: false,
                 axisLine: { onZero: false },
@@ -611,7 +663,20 @@ const setOption = () => {
                 axisTick: { show: false },
                 splitLine: { show: false }
             },
+            {
+                scale: true,
+                gridIndex: 3,
+                splitLine: {
+                    lineStyle: {
+                        type: 'dashed',  // 設置分隔線為虛線
+                        color: '#3C3C3C',   // 設置分隔線顏色
+                        width: 1         // 設置分隔線寬度
+                    }
+                },
+                axisLine: { show: false },
+                axisTick: { show: false },
 
+            },
         ],
     }
 }
@@ -655,6 +720,33 @@ const calculateKD = (closingPrices, highPrices, lowPrices, periodK = 9, periodD 
     return { k, d };
 }
 
+// 计算指数平滑移动平均线（EMA）
+// const calculateEMA = (prices, period) => {
+//     let ema = [];
+//     let multiplier = 2 / (period + 1);
+
+//     for (var i = 0; i < prices.length; i++) {
+//         if (i === 0) {
+//             ema.push(prices[i]); // 第一个值直接使用价格
+//         } else {
+//             ema.push((prices[i] - ema[i - 1]) * multiplier + ema[i - 1]);
+//         }
+//     }
+//     return ema;
+// }
+
+// 计算MACD指标
+// const calculateMACD = (closingPrices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) => {
+//     let emaShort = calculateEMA(closingPrices, shortPeriod);
+//     let emaLong = calculateEMA(closingPrices, longPeriod);
+//     let dif = emaShort.map((value, index) => value - emaLong[index]);
+
+//     let dea = calculateEMA(dif, signalPeriod);
+//     let macd = dif.map((value, index) => value - dea[index]); // MACD柱状图
+
+//     return { dif, dea, macd };
+// }
+
 const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     if (closePrice == lastClosePrice) {
         return
@@ -670,14 +762,38 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 
 <style scoped>
 .chart {
-    height: 700px;
+    height: 900px;
     width: 40vw;
     transition: width 1s ease;
 }
 
 .chartBig {
-    height: 700px;
+    height: 900px;
     width: 80vw;
     transition: width 1s ease;
+}
+
+.maWrap {
+    position: absolute;
+    z-index: 1;
+    top: 35px;
+    left: 10px;
+    font-size: .8rem;
+}
+
+.kdWrap {
+    position: absolute;
+    z-index: 1;
+    top: 480px;
+    left: 10px;
+    font-size: .8rem;
+}
+
+.macdWrap {
+    position: absolute;
+    z-index: 1;
+    top: 640px;
+    left: 10px;
+    font-size: .8rem;
 }
 </style>

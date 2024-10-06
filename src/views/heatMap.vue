@@ -24,7 +24,7 @@
     </div>
 
     <div style="width: 100%; height: 80% ;">
-      <v-chart ref="chart" :option="option" :loading="heatMap.loading" autoresize/>
+      <v-chart ref="chart" :option="option" :loading="heatMap.loading" autoresize />
     </div>
   </div>
 </template>
@@ -32,7 +32,6 @@
 <script setup>
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
-import { useIndexStore } from '@/store/modules/index.js'
 import { industryConfig } from '@/config'
 import API from '@/apis'
 
@@ -49,34 +48,34 @@ const downColor = '#91F840';
 const downBorderColor = '#6fda1a';
 
 const heatMap = reactive({
-    loading: true,
-    data:{
+  loading: true,
+  data: {
 
-    }
+  }
 })
 
-onMounted(async() => {
+onMounted(async () => {
   heatMapChg()
 })
 
 const heatMapChg = async () => {
   heatMap.loading = true
   let path = market.value
-  if(timeRange.value){
+  if (timeRange.value) {
     path += `?period=${timeRange.value}`
-  } 
+  }
   heatMap.data = await API.Stock.getStockHeatMap(path)
 
   //依產業
-  if(groupType.value == 'industry'){
+  if (groupType.value == 'industry') {
     heatMap.data.data.splice(0, 1)
     heatMap.data.data = heatMap.data.data.filter((item) => item.type == 'INDEX')
     heatMap.data.data = heatMap.data.data.map(
-      item => { 
-        return { ...item, name: `${item.name.replace('指數','').replace('櫃買','')}\n${item.changePercent}%`, value: [item.tradeValue, item.changePercent]} 
+      item => {
+        return { ...item, name: `${item.name.replace('指數', '').replace('櫃買', '')}\n${item.changePercent}%`, value: [item.tradeValue, item.changePercent] }
       })
 
-  }else{
+  } else {
     //依個股
     let data = heatMap.data.data.filter((item) => item.type == 'EQUITY')
     heatMap.data.data = []
@@ -84,13 +83,13 @@ const heatMapChg = async () => {
     industryConfig.forEach(item => {
       let filterObj = data.filter((itm) => item.value == itm.industry)
       let weight = filterObj.reduce((accumulator, item) => {
-          return accumulator + item.marketValueWeight  
+        return accumulator + item.marketValueWeight
       }, 0)
       let parent = { name: item.label, value: weight }
       parent.children = [...filterObj]
       parent.children = parent.children.map(
-        item => { 
-          return { ...item, name: `${item.name}\n${item.changePercent}%`, value: [item.marketValueWeight, item.changePercent]} 
+        item => {
+          return { ...item, name: `${item.name}\n${item.changePercent}%`, value: [item.marketValueWeight, item.changePercent] }
         })
       heatMap.data.data.push(parent)
     })
@@ -98,38 +97,38 @@ const heatMapChg = async () => {
 
   option.value = {
     series: [
-        {
-          name: '發行量加權股價指數',
-          type: 'treemap',
-          data: heatMap.data.data,
-          visualDimension: 1, // 基于第一个维度（涨跌幅度）调整颜色'
+      {
+        name: '發行量加權股價指數',
+        type: 'treemap',
+        data: heatMap.data.data,
+        visualDimension: 1, // 基于第一个维度（涨跌幅度）调整颜色'
 
-          upperLabel: {
-            show: true,
-            height: 30,
-            backgroundColor: '#131313',  // 设置背景为透明
-            textStyle: {
-                color: '#ffffff',
-                fontSize: 14,     
-            }
-          },
-          itemStyle: {
-            borderColor: '#fff',
-            gapWidth: 0.5,
-          },
-        }
+        upperLabel: {
+          show: true,
+          height: 30,
+          backgroundColor: '#131313',  // 设置背景为透明
+          textStyle: {
+            color: '#ffffff',
+            fontSize: 14,
+          }
+        },
+        itemStyle: {
+          borderColor: '#fff',
+          gapWidth: 0.5,
+        },
+      }
     ],
     visualMap: {
-        type: 'continuous',
-        min: timeRange.value ? -30 : -10, // 最小跌幅
-        max: timeRange.value ? 30 : 10,  // 最大涨幅
-        inRange: {
-                color: [downColor, downBorderColor, '#007500', '#3C3C3C', '#750000', upBorderColor, upColor]
-        },
-        calculable: true, // 显示视觉映射控制条
-        orient: 'horizontal', // 设置为水平布局
-        left: '10%', // 水平居中
- 
+      type: 'continuous',
+      min: timeRange.value ? -30 : -10, // 最小跌幅
+      max: timeRange.value ? 30 : 10,  // 最大涨幅
+      inRange: {
+        color: [downColor, downBorderColor, '#007500', '#3C3C3C', '#750000', upBorderColor, upColor]
+      },
+      calculable: true, // 显示视觉映射控制条
+      orient: 'horizontal', // 设置为水平布局
+      left: '10%', // 水平居中
+
     }
   };
 
@@ -139,8 +138,8 @@ const heatMapChg = async () => {
 </script>
 
 <style lang="scss" scoped>
-.heatMap{
-    height: 100vh;
-    width: 80vw;
+.heatMap {
+  height: 100vh;
+  width: 80vw;
 }
 </style>

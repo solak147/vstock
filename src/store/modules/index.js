@@ -6,10 +6,12 @@ export const useIndexStore = defineStore(
   () => {
     const info = reactive( { data: {} })
     const candles = reactive({ data: {}})
+    const tec5Years = reactive({ data: {}}) //最近5年股價+技術指標+即時
 
     return {
       info,
-      candles
+      candles,
+      tec5Years    
     }
   },
   {

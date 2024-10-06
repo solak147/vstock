@@ -9,7 +9,6 @@
 <script setup>
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
-import { useIndexStore } from '@/store/modules/index.js'
 import Utils from '@/utils'
 
 const props = defineProps({
@@ -20,7 +19,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['reOrder', 'chgLegend'])
-const indexStore = useIndexStore()
 const chart = ref(null)
 const option = ref(null)
 let candles = reactive({})
