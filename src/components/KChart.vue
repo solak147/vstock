@@ -5,11 +5,10 @@
 
         <div v-if="maTxt.ma5" class="flex maWrap">
             <div :style="`color:${ma5Color}`" class="w-110 text-left">5MA：{{ maTxt.ma5 }}</div>
-            <div :style="`color:${ma10Color}`" class="w-110 text-left">5MA：{{ maTxt.ma10 }}</div>
-            <div :style="`color:${ma20Color}`" class="w-110 text-left">5MA：{{ maTxt.ma20 }}</div>
-            <div :style="`color:${ma60Color}`" class="w-110 text-left">5MA：{{ maTxt.ma60 }}</div>
+            <div :style="`color:${ma10Color}`" class="w-110 text-left">10MA：{{ maTxt.ma10 }}</div>
+            <div :style="`color:${ma20Color}`" class="w-110 text-left">20MA：{{ maTxt.ma20 }}</div>
+            <div :style="`color:${ma60Color}`" class="w-110 text-left">60MA：{{ maTxt.ma60 }}</div>
         </div>
-
 
         <div v-if="kdTxt.k9" class="flex kdWrap">
             <div :style="`color:${ma10Color}`" class="w-80 text-left">K9：{{ kdTxt.k9 }}</div>
@@ -20,6 +19,11 @@
             <div :style="`color:${ma5Color}`" class="w-80 text-left">DIF：{{ macdTxt.dif }}</div>
             <div :style="`color:${ma20Color}`" class="w-100 text-left">MACD：{{ macdTxt.macd }}</div>
             <div :style="`color:${upColor}`" class="w-100 text-left">D-M：{{ macdTxt.dm }}</div>
+        </div>
+
+        <div v-if="rsiTxt.rsi6" class="flex rsiWrap">
+            <div :style="`color:${ma10Color}`" class="w-80 text-left">RSI6：{{ rsiTxt.rsi6 }}</div>
+            <div :style="`color:${ma20Color}`" class="w-100 text-left">RSI12：{{ rsiTxt.rsi12 }}</div>
         </div>
     </div>
 </template>
@@ -65,6 +69,11 @@ const macdTxt = reactive({
     dm: '',
 })
 
+const rsiTxt = reactive({
+    rsi6: '',
+    rsi12: '',
+})
+
 
 const duringOptions = [
     {
@@ -102,6 +111,7 @@ let candles = reactive({
 
         kdData: {},
         macdData: {},
+        rsiData: {},
     }
 })
 
@@ -164,6 +174,7 @@ onMounted(async () => {
     fiveYearClose.value = resClose.data.content.rawContent.reverse()
     let previousVol = fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < candles.data.category[0]).close
 
+    console.log(res.data)
     candles.data.volume = res.data.map((item, key) => {
 
         let color = 1
@@ -177,7 +188,7 @@ onMounted(async () => {
 
         previousVol = item.close
 
-        return [key, item.volume, color]
+        return [key, item.volume, color,]
     })
 
     let kdParam = {
@@ -191,14 +202,18 @@ onMounted(async () => {
     candles.data.kdData.d.splice(0, delKey)
 
     candles.data.macdData.dif = indexStore.tec5Years.data.day.map(item => item.ema12 - item.ema26)
-    candles.data.macdData.dea = indexStore.tec5Years.data.day.map(item => item.ema12_26)
+    candles.data.macdData.dea = indexStore.tec5Years.data.day.map(item => item.macd12_26)
     candles.data.macdData.macd = indexStore.tec5Years.data.day.map(item => item.osc)
-
 
     delKey = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') === candles.data.category[0])
     candles.data.macdData.dif.splice(0, delKey)
     candles.data.macdData.dea.splice(0, delKey)
     candles.data.macdData.macd.splice(0, delKey)
+
+    candles.data.rsiData.rsi6 = indexStore.tec5Years.data.day.map(item => item.eRsi6)
+    candles.data.rsiData.rsi12 = indexStore.tec5Years.data.day.map(item => item.eRsi12)
+    candles.data.rsiData.rsi6.splice(0, delKey)
+    candles.data.rsiData.rsi12.splice(0, delKey)
 
     setOption()
     loading.value = false
@@ -243,6 +258,7 @@ const setOption = () => {
             formatter: function (params) {
 
                 let k = params.filter(item => item.seriesIndex == 0)[0]
+                let volume = params.filter(item => item.seriesIndex == 1)[0]
                 let ma5 = params.filter(item => item.seriesIndex == 2)[0]
                 let ma10 = params.filter(item => item.seriesIndex == 3)[0]
                 let ma20 = params.filter(item => item.seriesIndex == 4)[0]
@@ -252,12 +268,15 @@ const setOption = () => {
                 let macd = params.filter(item => item.seriesIndex == 8)[0]
                 let dif = params.filter(item => item.seriesIndex == 9)[0]
                 let dea = params.filter(item => item.seriesIndex == 10)[0]
+                let rsi6 = params.filter(item => item.seriesIndex == 11)[0]
+                let rsi12 = params.filter(item => item.seriesIndex == 12)[0]
 
                 let lastClosePrice = candles.data.list[k.dataIndex - 1] ? candles.data.list[k.dataIndex - 1][1]
                     : fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < k.axisValue).close //上一K棒收價
                 let up = (k.value[2] - lastClosePrice).toFixed(2)
                 let percent = (up / lastClosePrice * 100).toFixed(2)
 
+                console.log(volume)
                 if (ma5) {
                     maTxt.ma5 = ma5.value
                     maTxt.ma10 = ma10.value
@@ -276,6 +295,11 @@ const setOption = () => {
                     macdTxt.dm = (dif.value - macd.value).toFixed(2)
                 }
 
+                if (rsi6) {
+                    rsiTxt.rsi6 = rsi6.value
+                    rsiTxt.rsi12 = rsi12.value
+                }
+
                 return `<div style=" text-align: left;">
                     ${params[0].name} <br/>
                     <span style="color:${setTooltipColor(k.value[1], lastClosePrice)}">開 :<span style="margin-left: 10px">${k.value[1]}</span></span><br/>
@@ -284,7 +308,7 @@ const setOption = () => {
                     <span style="color:${setTooltipColor(k.value[4], lastClosePrice)}">高 :<span style="margin-left: 10px">${k.value[4]}</span></span><br/> 
                     <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 10px">${up > 0 ? '+' + up : up}</span></span><br/>
                     <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 10px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
-                    量 :<span style="margin-left: 10px">${(k.value[7] / 100000000).toFixed(3)}億元</span><br/> 
+                    量 :<span style="margin-left: 10px">${(volume.value[1] / 100000000).toFixed(3)}億元</span><br/> 
                 </div>`;
 
 
@@ -331,13 +355,13 @@ const setOption = () => {
         dataZoom: [
             {
                 type: 'inside',
-                xAxisIndex: [0, 1, 2, 3],
+                xAxisIndex: [0, 1, 2, 3, 4],
                 start: 0,
                 end: 100
             },
             {
                 show: false,
-                xAxisIndex: [0, 1, 2, 3],
+                xAxisIndex: [0, 1, 2, 3, 4],
                 type: 'slider',
                 top: '85%',
                 start: 0,
@@ -479,8 +503,9 @@ const setOption = () => {
                 yAxisIndex: 2,
                 data: candles.data.kdData.k,
                 smooth: true,
+                showSymbol: false,
                 lineStyle: {
-                    color: ma20Color
+                    color: ma10Color
                 },
                 markLine: {
                     label: {
@@ -493,7 +518,7 @@ const setOption = () => {
                         { yAxis: 80, name: '固定值 80' },
                     ],
                     lineStyle: {
-                        color: '#4d4d4d',
+                        color: '#3C3C3C',
                     }
                 },
             },
@@ -504,8 +529,9 @@ const setOption = () => {
                 yAxisIndex: 2,
                 data: candles.data.kdData.d,
                 smooth: true,
+                showSymbol: false,
                 lineStyle: {
-                    color: ma10Color
+                    color: ma20Color
                 }
             },
             {
@@ -522,6 +548,7 @@ const setOption = () => {
                 yAxisIndex: 3,
                 data: candles.data.macdData.dif,
                 smooth: true,
+                showSymbol: false,
                 lineStyle: {
                     color: ma5Color
                 }
@@ -533,6 +560,45 @@ const setOption = () => {
                 yAxisIndex: 3,
                 data: candles.data.macdData.dea,
                 smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    color: ma20Color
+                }
+            },
+            {
+                name: 'rsi6',
+                type: 'line',
+                xAxisIndex: 4,
+                yAxisIndex: 4,
+                data: candles.data.rsiData.rsi6,
+                smooth: true,
+                showSymbol: false,
+                lineStyle: {
+                    color: ma10Color
+                },
+                markLine: {
+                    label: {
+                        show: false
+                    },
+                    symbol: ['none', 'none'],
+                    data: [
+                        { yAxis: 20, name: '固定值 20' },
+                        { yAxis: 50, name: '固定值 50' },
+                        { yAxis: 80, name: '固定值 80' },
+                    ],
+                    lineStyle: {
+                        color: '#3C3C3C',
+                    }
+                },
+            },
+            {
+                name: 'rsi12',
+                type: 'line',
+                xAxisIndex: 4,
+                yAxisIndex: 4,
+                data: candles.data.rsiData.rsi12,
+                smooth: true,
+                showSymbol: false,
                 lineStyle: {
                     color: ma20Color
                 }
@@ -548,20 +614,26 @@ const setOption = () => {
             {
                 left: '10%',
                 right: '8%',
-                top: '37%',
-                height: '15%'
+                top: '40%',
+                height: '10%'
             },
             {
                 left: '10%',
                 right: '8%',
                 top: '55%',
-                height: '15%'
+                height: '10%'
             },
             {
                 left: '10%',
                 right: '8%',
-                top: '75%',
-                height: '15%'
+                top: '72%',
+                height: '10%'
+            },
+            {
+                left: '10%',
+                right: '8%',
+                top: '88%',
+                height: '10%'
             },
         ],
         xAxis: [
@@ -605,6 +677,19 @@ const setOption = () => {
                 scale: true,
                 type: 'category',
                 gridIndex: 3,
+                data: candles.data.category,
+                boundaryGap: false,
+                axisLine: { onZero: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                min: 'dataMin',
+                max: 'dataMax'
+            },
+            {
+                scale: true,
+                type: 'category',
+                gridIndex: 4,
                 data: candles.data.category,
                 boundaryGap: false,
                 axisLine: { onZero: false },
@@ -676,6 +761,24 @@ const setOption = () => {
                 axisLine: { show: false },
                 axisTick: { show: false },
 
+            },
+            {
+                scale: true,
+                gridIndex: 4,
+                axisLabel: {
+                    formatter: function (value) {
+                        if (value === 20 || value === 50 || value === 80) {
+                            return value;
+                        }
+                        return '';
+                    }
+                },
+                min: 0,
+                max: 100,
+                interval: 10,  //调整刻度间隔
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false }
             },
         ],
     }
@@ -762,13 +865,13 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 
 <style scoped>
 .chart {
-    height: 900px;
+    height: 800px;
     width: 40vw;
     transition: width 1s ease;
 }
 
 .chartBig {
-    height: 900px;
+    height: 800px;
     width: 80vw;
     transition: width 1s ease;
 }
@@ -784,7 +887,7 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 .kdWrap {
     position: absolute;
     z-index: 1;
-    top: 480px;
+    top: 415px;
     left: 10px;
     font-size: .8rem;
 }
@@ -792,7 +895,15 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 .macdWrap {
     position: absolute;
     z-index: 1;
-    top: 640px;
+    top: 540px;
+    left: 10px;
+    font-size: .8rem;
+}
+
+.rsiWrap {
+    position: absolute;
+    z-index: 1;
+    top: 680px;
     left: 10px;
     font-size: .8rem;
 }

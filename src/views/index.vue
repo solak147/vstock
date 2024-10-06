@@ -10,23 +10,29 @@
                 '+' : '-'}${candles.data.percent}%` }}</div>
         </div>
 
-        <div class="flex justify-around flex-wrap items-center">
+        <div class="flex justify-around">
             <transition-group name="fade">
-                <RealTimeChart :candles="candles" :style="{ order: order[0] }" @reOrder="reOrder" class="mb-10">
-                </RealTimeChart>
+                <div>
+                    <KChart symbol="IX0001" :style="{ order: order[0] }" @reOrder="reOrder" class="mb-10">
+                    </KChart>
 
-                <HistoryChart :candles="candlesHistory" :style="{ order: order[1] }" @reOrder="reOrder"
-                    @chgLegend="chgHistoryLegend" class="mb-10">
-                </HistoryChart>
+                    <LegalPersonChart symbol="IX0001" :style="{ order: order[4] }" @reOrder="reOrder" class="mb-10">
+                    </LegalPersonChart>
 
-                <LegalPersonChart symbol="IX0001" :style="{ order: order[2] }" @reOrder="reOrder" class="mb-10">
-                </LegalPersonChart>
+                </div>
 
-                <PttCard symbol="IX0001" :style="{ order: order[3] }" class="mb-10"></PttCard>
+                <div>
+                    <RealTimeChart :candles="candles" :style="{ order: order[1] }" @reOrder="reOrder" class="mb-10">
+                    </RealTimeChart>
 
-                <KChart symbol="IX0001" :style="{ order: order[4] }" @reOrder="reOrder" class="mb-10">
-                </KChart>
+                    <HistoryChart :candles="candlesHistory" :style="{ order: order[2] }" @reOrder="reOrder"
+                        @chgLegend="chgHistoryLegend" class="mb-10">
+                    </HistoryChart>
 
+                    <PttCard symbol="IX0001" :style="{ order: order[3] }" class="mb-10"></PttCard>
+
+                    <div style="width: 40vw; order:5"></div>
+                </div>
             </transition-group>
 
         </div>
@@ -48,22 +54,6 @@ import Utils from '@/utils'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
-const chart = ref(null)
-const order = ref([1, 2, 3, 4, 5])
-const reOrder = (isBig, key) => {
-    if (isBig) {
-        order.value = order.value.map((item, k) => {
-            if (k < key) {
-                return item + 1
-            } else if (k == key) {
-                return 1
-            } else {
-                return item
-            }
-        })
-        console.log(order.value)
-    }
-}
 
 const candles = reactive({
     data: {
@@ -111,7 +101,6 @@ watch(
 )
 
 onMounted(async () => {
-
     if (Object.keys(indexStore.candles.data).length === 0 || Object.keys(indexStore.info.data).length === 0) {
         return
     }
@@ -122,6 +111,7 @@ onMounted(async () => {
 
     //歷史走勢
     serHistoryCandles('1Y')
+
 })
 
 const setInfo = () => {
@@ -201,6 +191,21 @@ const chgHistoryLegend = (legend) => {
     serHistoryCandles(legend)
 }
 
+const order = ref([1, 2, 3, 4, 5])
+const reOrder = (isBig, key) => {
+    // if (isBig) {
+    //     order.value = order.value.map((item, k) => {
+    //         if (k < key) {
+    //             return item + 1
+    //         } else if (k == key) {
+    //             return 1
+    //         } else {
+    //             return item
+    //         }
+    //     })
+    //     console.log(order.value)
+    // }
+}
 </script>
 
 <style lang="scss" scoped>
