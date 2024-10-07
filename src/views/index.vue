@@ -10,7 +10,7 @@
                 '+' : '-'}${candles.data.percent}%` }}</div>
         </div>
 
-        <div class="flex justify-around">
+        <div class="flex justify-around flex-wrap">
             <transition-group name="fade">
                 <div>
                     <KChart symbol="IX0001" :style="{ order: order[0] }" @reOrder="reOrder" class="mb-10">
@@ -210,6 +210,7 @@ const reOrder = (isBig, key) => {
 
 <style lang="scss" scoped>
 .index {
+    position: relative;
     padding: 30px 10px;
     height: calc(100vh - 60px);
     overflow-y: auto;

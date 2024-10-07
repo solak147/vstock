@@ -53,9 +53,15 @@ onMounted(async () => {
   indexStore.info.data = await API.Stock.getStockInfo('IX0001')
 
   const today = Utils.dateFormate(new Date(), 'yymmdd')
-  const tecDate = Utils.dateFormate(indexStore.tec5Years.data.day[indexStore.tec5Years.data.day.length - 1].date, 'yymmdd')
-  if (today != tecDate) {
+
+  if (!indexStore.tec5Years.data.day) {
     indexStore.tec5Years.data = (await API.Stock.getFcnt('FCNT000099', 'IX0001')).data.content.rawContent
+  } else {
+    const tecDate = Utils.dateFormate(indexStore.tec5Years.data.day[indexStore.tec5Years.data.day.length - 1].date, 'yymmdd')
+
+    if (today != tecDate) {
+      indexStore.tec5Years.data = (await API.Stock.getFcnt('FCNT000099', 'IX0001')).data.content.rawContent
+    }
   }
 
 })

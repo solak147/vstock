@@ -414,4 +414,10 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     width: 80vw;
     transition: width 1s ease;
 }
+
+@media screen and (max-width: 768px) {
+    .chart {
+        width: 95vw;
+    }
+}
 </style>

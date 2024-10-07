@@ -92,4 +92,10 @@ const nextClick = async () => {
         padding: 0 20px;
     }
 }
+
+@media screen and (max-width: 768px) {
+    .pttCard {
+        width: 95vw;
+    }
+}
 </style>

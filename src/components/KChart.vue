@@ -3,7 +3,7 @@
         <v-chart ref="chart" :class="{ chart: !candles.data?.isBig, chartBig: candles.data?.isBig, }" :option="option"
             :loading="loading" @legendselectchanged="legendselectchanged" autoresize />
 
-        <div v-if="maTxt.ma5" class="flex maWrap">
+        <div v-if="maTxt.ma5" class="flex maWrap maTxt">
             <div :style="`color:${ma5Color}`" class="w-110 text-left">5MA：{{ maTxt.ma5 }}</div>
             <div :style="`color:${ma10Color}`" class="w-110 text-left">10MA：{{ maTxt.ma10 }}</div>
             <div :style="`color:${ma20Color}`" class="w-110 text-left">20MA：{{ maTxt.ma20 }}</div>
@@ -120,62 +120,53 @@ onMounted(async () => {
 
     loading.value = true
 
-    let nowDate = new Date()
-    let lastDate = new Date()
-    let maDate = new Date()
     let delKey
+    let startIdx
+    let filterData
+    let startDate = new Date()
 
-    if (duringModel.value == '1Y') {
-        lastDate.setFullYear(nowDate.getFullYear() - 1)
-        lastDate.setDate(lastDate.getDate() + 1)
+    // if (duringModel.value == '1Y') {
+    //     lastDate.setFullYear(nowDate.getFullYear() - 1)
+    //     lastDate.setDate(lastDate.getDate() + 1)
 
-        maDate.setFullYear(nowDate.getFullYear() - 1)
-        maDate.setDate(maDate.getDate() - 120)
-    } else if (duringModel.value == '6M') {
-        lastDate.setMonth(nowDate.getMonth() - 6)
-        lastDate.setDate(lastDate.getDate() + 1)
+    //     maDate.setFullYear(nowDate.getFullYear() - 1)
+    //     maDate.setDate(maDate.getDate() - 120)
+    // } else if (duringModel.value == '6M') {
+    //     lastDate.setMonth(nowDate.getMonth() - 6)
+    //     lastDate.setDate(lastDate.getDate() + 1)
 
-        maDate.setMonth(nowDate.getMonth() - 6)
-        maDate.setDate(maDate.getDate() - 120)
-    } else if (duringModel.value == '1M') {
-        lastDate.setMonth(nowDate.getMonth() - 1)
-        lastDate.setDate(lastDate.getDate() + 1)
+    //     maDate.setMonth(nowDate.getMonth() - 6)
+    //     maDate.setDate(maDate.getDate() - 120)
+    // } else if (duringModel.value == '1M') {
+    //     lastDate.setMonth(nowDate.getMonth() - 1)
+    //     lastDate.setDate(lastDate.getDate() + 1)
 
-        maDate.setMonth(nowDate.getMonth() - 1)
-        maDate.setDate(maDate.getDate() - 120)
-    }
+    //     maDate.setMonth(nowDate.getMonth() - 1)
+    //     maDate.setDate(maDate.getDate() - 120)
+    // }
 
-    let res = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-    res.data = res.data.reverse()
-    candles.data.list = res.data.map(item => [item.open, item.close, item.low, item.high, item.change])
-    candles.data.category = res.data.map(item => item.date)
-    candles.data.trend = res.data.map(item => { return { value: [item.date, item.close] } })
+    startDate.setFullYear(startDate.getFullYear() - 1)
+    startIdx = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') > Utils.dateFormate(startDate, 'yymmdd'))
+    filterData = indexStore.tec5Years.data.day.slice(startIdx, indexStore.tec5Years.data.day.length)
 
-    let resMa = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(maDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-    resMa.data = resMa.data.reverse()
-    delKey = resMa.data.findIndex(item => item.date === candles.data.category[0])
-    candles.data.trend5 = resMa.data.map(item => item.close)
-    candles.data.trend5 = calculateMA(candles.data.trend5, 5)
-    candles.data.trend5.splice(0, delKey)
+    candles.data.list = filterData.map(item => [item.open, item.close, item.low, item.high, item.change])
+    candles.data.category = filterData.map(item => Utils.dateFormate(item.date, 'yymmdd'))
+    candles.data.trend = filterData.map(item => { return { value: [item.date, item.close] } })
 
-    candles.data.trend10 = resMa.data.map(item => item.close)
-    candles.data.trend10 = calculateMA(candles.data.trend10, 10)
-    candles.data.trend10.splice(0, delKey)
+    candles.data.kdData.k = filterData.map(item => item.k9)
+    candles.data.kdData.d = filterData.map(item => item.d9)
 
-    candles.data.trend20 = resMa.data.map(item => item.close)
-    candles.data.trend20 = calculateMA(candles.data.trend20, 20)
-    candles.data.trend20.splice(0, delKey)
+    candles.data.macdData.dif = filterData.map(item => item.ema12 - item.ema26)
+    candles.data.macdData.dea = filterData.map(item => item.macd12_26)
+    candles.data.macdData.macd = filterData.map(item => item.osc)
 
-    candles.data.trend60 = resMa.data.map(item => item.close)
-    candles.data.trend60 = calculateMA(candles.data.trend60, 60)
-    candles.data.trend60.splice(0, delKey)
+    candles.data.rsiData.rsi6 = filterData.map(item => item.eRsi6)
+    candles.data.rsiData.rsi12 = filterData.map(item => item.eRsi12)
 
-    let resClose = await API.Stock.getFcnt('FCNT000039', props.symbol)
-    fiveYearClose.value = resClose.data.content.rawContent.reverse()
-    let previousVol = fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < candles.data.category[0]).close
-
-    console.log(res.data)
-    candles.data.volume = res.data.map((item, key) => {
+    let currentIndex = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') == candles.data.category[0])
+    let previousVol = indexStore.tec5Years.data.day[currentIndex - 1].close
+    console.log(previousVol, candles.data.category[0], indexStore.tec5Years.data)
+    candles.data.volume = filterData.map((item, key) => {
 
         let color = 1
         if (previousVol) {
@@ -188,32 +179,31 @@ onMounted(async () => {
 
         previousVol = item.close
 
-        return [key, item.volume, color,]
+        return [key, item.volume, color, item.volumeOrAmount]
     })
 
-    let kdParam = {
-        closingPrices: resMa.data.map(item => item.close),
-        highPrices: resMa.data.map(item => item.high),
-        lowPrices: resMa.data.map(item => item.low),
-    }
+    let idx60 = Math.max(0, currentIndex - 60);
+    let resMa = indexStore.tec5Years.data.day.slice(idx60, currentIndex)
+    filterData.unshift(...resMa)
 
-    candles.data.kdData = calculateKD(kdParam.closingPrices, kdParam.highPrices, kdParam.lowPrices)
-    candles.data.kdData.k.splice(0, delKey)
-    candles.data.kdData.d.splice(0, delKey)
+    candles.data.trend5 = filterData.map(item => item.close)
+    candles.data.trend5 = calculateMA(candles.data.trend5, 5)
+    candles.data.trend5.splice(0, 60)
 
-    candles.data.macdData.dif = indexStore.tec5Years.data.day.map(item => item.ema12 - item.ema26)
-    candles.data.macdData.dea = indexStore.tec5Years.data.day.map(item => item.macd12_26)
-    candles.data.macdData.macd = indexStore.tec5Years.data.day.map(item => item.osc)
+    candles.data.trend10 = filterData.map(item => item.close)
+    candles.data.trend10 = calculateMA(candles.data.trend10, 10)
+    candles.data.trend10.splice(0, 60)
 
-    delKey = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') === candles.data.category[0])
-    candles.data.macdData.dif.splice(0, delKey)
-    candles.data.macdData.dea.splice(0, delKey)
-    candles.data.macdData.macd.splice(0, delKey)
+    candles.data.trend20 = filterData.map(item => item.close)
+    candles.data.trend20 = calculateMA(candles.data.trend20, 20)
+    candles.data.trend20.splice(0, 60)
 
-    candles.data.rsiData.rsi6 = indexStore.tec5Years.data.day.map(item => item.eRsi6)
-    candles.data.rsiData.rsi12 = indexStore.tec5Years.data.day.map(item => item.eRsi12)
-    candles.data.rsiData.rsi6.splice(0, delKey)
-    candles.data.rsiData.rsi12.splice(0, delKey)
+    candles.data.trend60 = filterData.map(item => item.close)
+    candles.data.trend60 = calculateMA(candles.data.trend60, 60)
+    candles.data.trend60.splice(0, 60)
+
+    let resClose = await API.Stock.getFcnt('FCNT000039', props.symbol)
+    fiveYearClose.value = resClose.data.content.rawContent.reverse()
 
     setOption()
     loading.value = false
@@ -276,7 +266,6 @@ const setOption = () => {
                 let up = (k.value[2] - lastClosePrice).toFixed(2)
                 let percent = (up / lastClosePrice * 100).toFixed(2)
 
-                console.log(volume)
                 if (ma5) {
                     maTxt.ma5 = ma5.value
                     maTxt.ma10 = ma10.value
@@ -308,10 +297,8 @@ const setOption = () => {
                     <span style="color:${setTooltipColor(k.value[4], lastClosePrice)}">高 :<span style="margin-left: 10px">${k.value[4]}</span></span><br/> 
                     <span style="color:${setTooltipColor(up)}">${up > 0 ? '漲' : '跌'} :<span style="margin-left: 10px">${up > 0 ? '+' + up : up}</span></span><br/>
                     <span style="color:${setTooltipColor(up)}">幅 :<span style="margin-left: 10px">${up > 0 ? '+' + percent : percent}%</span></span><br/>
-                    量 :<span style="margin-left: 10px">${(volume.value[1] / 100000000).toFixed(3)}億元</span><br/> 
+                    量 :<span style="margin-left: 10px">${volume.value[3]}億元</span><br/> 
                 </div>`;
-
-
 
             },
             position: function (pos, params, el, elRect, size) {
@@ -863,7 +850,7 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .chart {
     height: 800px;
     width: 40vw;
@@ -874,6 +861,21 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     height: 800px;
     width: 80vw;
     transition: width 1s ease;
+}
+
+@media screen and (max-width: 768px) {
+    .chart {
+        width: 95vw;
+    }
+
+    .maTxt {
+        font-size: 10px !important;
+        max-width: 95vw;
+
+        div {
+            width: 90px;
+        }
+    }
 }
 
 .maWrap {

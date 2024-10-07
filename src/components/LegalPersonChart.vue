@@ -392,6 +392,12 @@ const legendselectchanged = (params) => {
     transition: width 1s ease;
 }
 
+@media screen and (max-width: 768px) {
+    .chart {
+        width: 95vw;
+    }
+}
+
 .duringSel {
     position: absolute;
     z-index: 1;
