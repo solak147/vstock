@@ -1,7 +1,9 @@
 <template>
     <div class="relative">
         <v-chart ref="chart" :class="{ chart: !candles.data?.isBig, chartBig: candles.data?.isBig, }" :option="option"
-            :loading="loading" @legendselectchanged="legendselectchanged" autoresize />
+            :loading="loading" autoresize />
+
+        <el-divider border-style="dashed" class="closeLine" :style="`top: ${candles.data.tooltipClose}px !important`" />
 
         <div v-if="maTxt.ma5" class="flex maWrap maTxt">
             <div :style="`color:${ma5Color}`" class="w-110 text-left">5MA：{{ maTxt.ma5 }}</div>
@@ -74,7 +76,6 @@ const rsiTxt = reactive({
     rsi12: '',
 })
 
-
 const duringOptions = [
     {
         value: '1Y',
@@ -100,6 +101,7 @@ let candles = reactive({
     data: {
         isBig: false,    //是否放大
         width: '',
+        tooltipClose: 0,
 
         list: [],
         trend5: [],
@@ -152,6 +154,7 @@ onMounted(async () => {
     candles.data.list = filterData.map(item => [item.open, item.close, item.low, item.high, item.change])
     candles.data.category = filterData.map(item => Utils.dateFormate(item.date, 'yymmdd'))
     candles.data.trend = filterData.map(item => { return { value: [item.date, item.close] } })
+    candles.data.tooltipClose = candles.data.list[0][1]
 
     candles.data.kdData.k = filterData.map(item => item.k9)
     candles.data.kdData.d = filterData.map(item => item.d9)
@@ -165,7 +168,7 @@ onMounted(async () => {
 
     let currentIndex = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') == candles.data.category[0])
     let previousVol = indexStore.tec5Years.data.day[currentIndex - 1].close
-    console.log(previousVol, candles.data.category[0], indexStore.tec5Years.data)
+
     candles.data.volume = filterData.map((item, key) => {
 
         let color = 1
@@ -207,6 +210,23 @@ onMounted(async () => {
 
     setOption()
     loading.value = false
+
+    chart.value.chart.getZr().on('mousemove', function (event) {
+        var x = event.offsetX;  // 滑鼠相對於圖表的 X 座標
+        var y = event.offsetY;  // 滑鼠相對於圖表的 Y 座標
+
+        // 使用 convertFromPixel 方法，將像素座標轉換為對應的軸上的數據
+        const xIndex = chart.value.chart.convertFromPixel({ seriesIndex: 0 }, [x, y])[0];
+
+
+        // 取得 xIndex 對應的數據
+        let pixel
+        if (xIndex >= 0 && xIndex < candles.data.list.length) {
+            pixel = chart.value.chart.convertToPixel({ seriesIndex: 0 }, [xIndex, candles.data.list[xIndex][1]]);
+            setTimeout(() => candles.data.tooltipClose = pixel[1], 50)
+        }
+
+    });
 })
 
 const setOption = () => {
@@ -236,15 +256,19 @@ const setOption = () => {
                 // },
             ]
         },
+
         tooltip: {
             trigger: 'axis',
             axisPointer: {
-                type: 'cross'
+
             },
+
             backgroundColor: 'rgba(0,0,0,0.3)',
+
             textStyle: {
                 color: '#FFF',
             },
+
             formatter: function (params) {
 
                 let k = params.filter(item => item.seriesIndex == 0)[0]
@@ -265,6 +289,8 @@ const setOption = () => {
                     : fiveYearClose.value.find(item => Utils.dateFormate(item.date, 'yymmdd') < k.axisValue).close //上一K棒收價
                 let up = (k.value[2] - lastClosePrice).toFixed(2)
                 let percent = (up / lastClosePrice * 100).toFixed(2)
+
+                candles.data.tooltipClose = k.value[2]
 
                 if (ma5) {
                     maTxt.ma5 = ma5.value
@@ -317,7 +343,7 @@ const setOption = () => {
             ],
             label: {
                 backgroundColor: '#777'
-            }
+            },
         },
         toolbox: {
             show: true,
@@ -406,11 +432,6 @@ const setOption = () => {
                     color0: downColor,
                     borderColor: upBorderColor,
                     borderColor0: downBorderColor
-                },
-                tooltip: {
-                    formatter: function (param) {
-                        return param.name + '<br>' + (param.data.coord || '');
-                    }
                 },
                 emphasis: {
                     itemStyle: {
@@ -644,6 +665,12 @@ const setOption = () => {
                 axisTick: { show: false },
                 splitLine: { show: false },
                 axisLabel: { show: false },
+                axisPointer: {
+                    label: {
+                        show: false,
+
+                    }
+                },
                 min: 'dataMin',
                 max: 'dataMax'
             },
@@ -657,6 +684,12 @@ const setOption = () => {
                 axisTick: { show: false },
                 splitLine: { show: false },
                 axisLabel: { show: false },
+                axisPointer: {
+                    label: {
+                        show: false,
+
+                    }
+                },
                 min: 'dataMin',
                 max: 'dataMax'
             },
@@ -670,6 +703,12 @@ const setOption = () => {
                 axisTick: { show: false },
                 splitLine: { show: false },
                 axisLabel: { show: false },
+                axisPointer: {
+                    label: {
+                        show: false,
+
+                    }
+                },
                 min: 'dataMin',
                 max: 'dataMax'
             },
@@ -683,8 +722,15 @@ const setOption = () => {
                 axisTick: { show: false },
                 splitLine: { show: false },
                 axisLabel: { show: false },
+                axisPointer: {
+                    label: {
+                        show: false,
+
+                    }
+                },
                 min: 'dataMin',
-                max: 'dataMax'
+                max: 'dataMax',
+
             },
         ],
         yAxis: [
@@ -765,7 +811,8 @@ const setOption = () => {
                 interval: 10,  //调整刻度间隔
                 axisLine: { show: false },
                 axisTick: { show: false },
-                splitLine: { show: false }
+                splitLine: { show: false },
+
             },
         ],
     }
@@ -908,5 +955,12 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     top: 680px;
     left: 10px;
     font-size: .8rem;
+}
+
+.closeLine {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    margin: 0;
 }
 </style>
