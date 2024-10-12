@@ -44,6 +44,17 @@ const props = defineProps({
     },
 })
 
+const indexStore = useIndexStore()
+watch(
+    () => indexStore.tec5Years.data,
+    () => {
+        setCandles()
+    },
+    {
+        deep: true,
+    }
+)
+
 const upColor = '#FF5B5B';
 const upBorderColor = '#ff3737';
 const downColor = '#91F840';
@@ -91,7 +102,6 @@ const duringOptions = [
     },
 ]
 
-const indexStore = useIndexStore()
 const chart = ref()
 const option = ref()
 const loading = ref(false)
@@ -118,9 +128,12 @@ let candles = reactive({
 })
 
 onMounted(async () => {
-    candles.data.width = chart.value.getWidth()
-
     loading.value = true
+    setOption()
+})
+
+const setCandles = async () => {
+    candles.data.width = chart.value.getWidth()
 
     let delKey
     let startIdx
@@ -210,7 +223,6 @@ onMounted(async () => {
 
     setOption()
     loading.value = false
-
     // chart.value.chart.getZr().on('mousemove', function (event) {
     //     var x = event.offsetX;  // 滑鼠相對於圖表的 X 座標
     //     var y = event.offsetY;  // 滑鼠相對於圖表的 Y 座標
@@ -226,8 +238,7 @@ onMounted(async () => {
     //     }
 
     // });
-
-})
+}
 
 const setOption = () => {
     option.value = {

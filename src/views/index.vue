@@ -66,11 +66,21 @@ const colorConfition = computed(() => {
     }
 })
 
+watch(
+    () => indexStore.tec5Years.data,
+    () => {
+        let yestodayIdx = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') == indexStore.info.data.date)
+        todayData.close = indexStore.tec5Years.data.day[yestodayIdx].close
+        todayData.change = indexStore.tec5Years.data.day[yestodayIdx].change
+        todayData.change_rate = indexStore.tec5Years.data.day[yestodayIdx].change_rate
+    },
+    {
+        deep: true,
+    }
+)
+
 onMounted(async () => {
-    let yestodayIdx = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') == indexStore.info.data.date)
-    todayData.close = indexStore.tec5Years.data.day[yestodayIdx].close
-    todayData.change = indexStore.tec5Years.data.day[yestodayIdx].change
-    todayData.change_rate = indexStore.tec5Years.data.day[yestodayIdx].change_rate
+
 })
 
 const order = ref([1, 2, 3, 4, 5])
