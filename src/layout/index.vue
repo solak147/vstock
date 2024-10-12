@@ -8,8 +8,7 @@
 
             <el-col :md="4" :sm="0" :xs="0">
                 <el-menu router active-text-color="#f4af1c" background-color="#131313"
-                    class="el-menu-vertical-demo menu" :default-active="getUrl()" text-color="#8b8a8a"
-                    @open="handleOpen" @close="handleClose">
+                    class="el-menu-vertical-demo menu" :default-active="getUrl()" text-color="#8b8a8a">
 
                     <el-menu-item index="/index">
                         <el-icon>
@@ -65,11 +64,11 @@ const drawer = reactive({
 })
 const direction = ref<DrawerProps['direction']>('ltr')
 
-const onTouchStart = (event) => {
+const onTouchStart = (event: any) => {
     drawer.touchStartX = event.changedTouches[0].screenX; // 记录起始触摸点
 }
 
-const onTouchMove = (event) => {
+const onTouchMove = (event: any) => {
     drawer.touchEndX = event.changedTouches[0].screenX; // 记录移动中的触摸点
 }
 
@@ -86,14 +85,6 @@ const onTouchEnd = () => {
 
 const handleDrawerClose = (done: () => void) => {
     done()
-}
-
-const handleOpen = (key, keyPath) => {
-    // console.log(key, keyPath)
-}
-
-const handleClose = (key, keyPath) => {
-    // console.log(key, keyPath)
 }
 
 const getUrl = () => {
