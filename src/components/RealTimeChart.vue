@@ -297,12 +297,12 @@ const setOption = () => {
         ],
         grid: [
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 height: '60%'
             },
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 top: '75%',
                 height: '20%'

@@ -3,7 +3,7 @@
         <v-chart ref="chart" :class="{ chart: !candles.data?.isBig, chartBig: candles.data?.isBig, }" :option="option"
             :loading="loading" autoresize />
 
-        <el-divider border-style="dashed" class="closeLine" :style="`top: ${candles.data.tooltipClose}px !important`" />
+        <!-- <el-divider border-style="dashed" class="closeLine" :style="`top: ${candles.data.tooltipClose}px !important`" /> -->
 
         <div v-if="maTxt.ma5" class="flex maWrap maTxt">
             <div :style="`color:${ma5Color}`" class="w-110 text-left">5MA：{{ maTxt.ma5 }}</div>
@@ -211,22 +211,22 @@ onMounted(async () => {
     setOption()
     loading.value = false
 
-    chart.value.chart.getZr().on('mousemove', function (event) {
-        var x = event.offsetX;  // 滑鼠相對於圖表的 X 座標
-        var y = event.offsetY;  // 滑鼠相對於圖表的 Y 座標
+    // chart.value.chart.getZr().on('mousemove', function (event) {
+    //     var x = event.offsetX;  // 滑鼠相對於圖表的 X 座標
+    //     var y = event.offsetY;  // 滑鼠相對於圖表的 Y 座標
 
-        // 使用 convertFromPixel 方法，將像素座標轉換為對應的軸上的數據
-        const xIndex = chart.value.chart.convertFromPixel({ seriesIndex: 0 }, [x, y])[0];
+    //     // 使用 convertFromPixel 方法，將像素座標轉換為對應的軸上的數據
+    //     const xIndex = chart.value.chart.convertFromPixel({ seriesIndex: 0 }, [x, y])[0];
 
+    //     // 取得 xIndex 對應的數據
+    //     let pixel
+    //     if (xIndex >= 0 && xIndex < candles.data.list.length) {
+    //         pixel = chart.value.chart.convertToPixel({ seriesIndex: 0 }, [xIndex, candles.data.list[xIndex][1]]);
+    //         setTimeout(() => candles.data.tooltipClose = pixel[1], 50)
+    //     }
 
-        // 取得 xIndex 對應的數據
-        let pixel
-        if (xIndex >= 0 && xIndex < candles.data.list.length) {
-            pixel = chart.value.chart.convertToPixel({ seriesIndex: 0 }, [xIndex, candles.data.list[xIndex][1]]);
-            setTimeout(() => candles.data.tooltipClose = pixel[1], 50)
-        }
+    // });
 
-    });
 })
 
 const setOption = () => {
@@ -260,7 +260,7 @@ const setOption = () => {
         tooltip: {
             trigger: 'axis',
             axisPointer: {
-
+                type: 'cross'
             },
 
             backgroundColor: 'rgba(0,0,0,0.3)',
@@ -614,31 +614,31 @@ const setOption = () => {
         ],
         grid: [
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 top: '8%',
                 height: '30%'
             },
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 top: '40%',
                 height: '10%'
             },
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 top: '55%',
                 height: '10%'
             },
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 top: '72%',
                 height: '10%'
             },
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 top: '88%',
                 height: '10%'

@@ -25,8 +25,7 @@
                     <RealTimeChart :candles="candles" :style="{ order: order[1] }" @reOrder="reOrder" class="mb-10">
                     </RealTimeChart>
 
-                    <HistoryChart :candles="candlesHistory" :style="{ order: order[2] }" @reOrder="reOrder"
-                        @chgLegend="chgHistoryLegend" class="mb-10">
+                    <HistoryChart symbol="IX0001" :style="{ order: order[2] }" @reOrder="reOrder" class="mb-10">
                     </HistoryChart>
 
                     <PttCard symbol="IX0001" :style="{ order: order[3] }" class="mb-10"></PttCard>
@@ -73,15 +72,6 @@ const candles = reactive({
     }
 })
 
-const candlesHistory = reactive({
-    data: {
-        trend: [],
-        category: [],
-        lastClose: 0, //去年,月收盤均價
-        currentSel: '1Y'  //目前圖表     
-    }
-})
-
 const colorConfition = computed(() => {
     return {
         red: candles.data.closePrice > indexStore.info.data.previousClose,
@@ -110,7 +100,7 @@ onMounted(async () => {
     setInfo()
 
     //歷史走勢
-    serHistoryCandles('1Y')
+    // serHistoryCandles('1Y')
 
 })
 
@@ -163,8 +153,8 @@ const serHistoryCandles = async (during) => {
     }
 
     res = await API.Stock.getStockHistory('IX0001', 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-    candlesHistory.data.trend = res.data.map(item => { return { value: [item.date, item.close] } })
-    candlesHistory.data.category = res.data.map(item => item.date)
+    candlesHistory.data.trend = res.data.map(item => { return { value: [item.date, item.close] } }).reverse()
+    candlesHistory.data.category = res.data.map(item => item.date).reverse()
 
     nowDate = new Date()
     lastDate = new Date()
@@ -185,10 +175,6 @@ const serHistoryCandles = async (during) => {
     candlesHistory.data.lastClose = res.data[0].close
 
 
-}
-
-const chgHistoryLegend = (legend) => {
-    serHistoryCandles(legend)
 }
 
 const order = ref([1, 2, 3, 4, 5])

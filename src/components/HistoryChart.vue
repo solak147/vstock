@@ -9,40 +9,81 @@
 <script setup>
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
+import API from '@/apis'
 import Utils from '@/utils'
 
 const props = defineProps({
-    candles: {
-        type: Object,
-        default: {}
+    symbol: {
+        type: String,
+        default: ''
     },
 })
 
-const emit = defineEmits(['reOrder', 'chgLegend'])
+const emit = defineEmits(['reOrder',])
 const chart = ref(null)
 const option = ref(null)
-let candles = reactive({})
+let candles = reactive({
+    data: {
+        trend: [],
+        category: [],
+        lastClose: 0, //去年,月收盤均價
+        currentSel: '1Y'  //目前圖表     
+    }
+})
 
 const upColor = '#FF5B5B';
 const upBorderColor = '#ff3737';
 const downColor = '#91F840';
 const downBorderColor = '#6fda1a';
 
-watch(
-    () => props.candles,
-    () => {
-        candles = props.candles
-        setOption()
-    },
-    {
-        deep: true,
-    }
-)
-
 onMounted(() => {
-    candles = props.candles
     candles.data.width = chart.value.getWidth()
+
+    setCandles('1Y')
+
 })
+
+const setCandles = async (during) => {
+    let res
+    let nowDate = new Date()
+    let lastDate = new Date()
+
+    if (during == '1Y') {
+        lastDate.setFullYear(nowDate.getFullYear() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+    } else if (during == '6M') {
+        lastDate.setMonth(nowDate.getMonth() - 6)
+        lastDate.setDate(lastDate.getDate() + 1)
+    } else if (during == '1M') {
+        lastDate.setMonth(nowDate.getMonth() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+    }
+
+    res = await API.Stock.getStockHistory(props.symbol, 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    candles.data.trend = res.data.map(item => { return { value: [item.date, item.close] } }).reverse()
+    candles.data.category = res.data.map(item => item.date).reverse()
+
+    nowDate = new Date()
+    lastDate = new Date()
+
+    //找上次平均收盤價,markLine顯示用
+    if (during == '1Y') {
+        lastDate.setFullYear(nowDate.getFullYear() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+    } else if (during == '6M') {
+        lastDate.setMonth(nowDate.getMonth() - 6)
+        lastDate.setDate(lastDate.getDate() + 1)
+    } else if (during == '1M') {
+        lastDate.setMonth(nowDate.getMonth() - 1)
+        lastDate.setDate(lastDate.getDate() + 1)
+    }
+
+    res = await API.Stock.getStockHistory(props.symbol, 'M', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
+    candles.data.lastClose = res.data[0].close
+
+    setOption()
+}
+
 
 const setOption = () => {
     option.value = {
@@ -155,17 +196,17 @@ const setOption = () => {
         series: setSeries(),
         grid: [
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 height: '75%'
             },
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 height: '75%'
             },
             {
-                left: '10%',
+                left: '14%',
                 right: '8%',
                 height: '75%'
             },
@@ -206,7 +247,7 @@ const setOption = () => {
                     if (value.max > candles.data.lastClose) {
                         return (value.max * 1.1).toFixed(0)
                     } else {
-                        return (candles.data.lastClose * 1).toFixed(0)
+                        return (candles.data.lastClose * 1.1).toFixed(0)
                     }
                 },
             },
@@ -289,7 +330,7 @@ const setSeries = () => {
 
 const legendselectchanged = (params) => {
     candles.data.currentSel = params.name
-    emit('chgLegend', params.name)
+    setCandles(params.name)
 }
 
 const setTooltipColor = (closePrice, lastClosePrice = 0) => {
