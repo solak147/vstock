@@ -10,11 +10,13 @@
 import { ref, onMounted, reactive, nextTick, onUnmounted, provide, watch, computed } from 'vue'
 import VChart, { THEME_KEY } from 'vue-echarts'
 import { useIndexStore } from '@/store/modules/index.js'
+import API from '@/apis'
+import Utils from '@/utils'
 
 const props = defineProps({
-    candles: {
-        type: Object,
-        default: {}
+    symbol: {
+        type: String,
+        default: ''
     },
 })
 
@@ -22,28 +24,100 @@ const emit = defineEmits(['reOrder'])
 const indexStore = useIndexStore()
 const chart = ref(null)
 const option = ref(null)
-let candles = reactive({})
+const candles = reactive({
+    socketData: {},
+
+    data: {
+        list: [],        //k棒
+        volume: [],     //量
+        trend: [],      //走勢   
+        category: [],
+        low: '',
+        high: '',
+        closePrice: '',  //收盤價
+        priceUp: '',     //上漲點數
+        percent: '',     //上漲幅度
+
+        width: '',
+        isBig: false,    //是否放大
+        currentSel: '走勢'   //目前圖表     
+    }
+})
 
 const upColor = '#FF5B5B';
 const upBorderColor = '#ff3737';
 const downColor = '#91F840';
 const downBorderColor = '#6fda1a';
 
-watch(
-    () => props.candles,
-    () => {
-        candles = props.candles
-        setOption()
-    },
-    {
-        deep: true,
-    }
-)
-
 onMounted(() => {
-    candles = props.candles
     candles.data.width = chart.value.getWidth()
+
+    const socket = new WebSocket('wss://api.fugle.tw/marketdata/v1.0/stock/streaming');
+
+    socket.onopen = () => {
+        socket.send(
+            JSON.stringify({
+                event: 'auth',
+                data: {
+                    apikey: 'YzY2MTY5OWQtMWQ3OC00OTMzLThiZTYtYzViMDA2ZmIzZTg3IDA1ZjEzNDc3LTMzYjAtNDY0OC1hMjVmLWJjODgzNTBkNTRlZQ==',
+                },
+            }),
+        );
+
+        socket.onmessage = (message) => {
+            const data = JSON.parse(message.data);
+
+            if (data.event === 'authenticated') {
+                socket.send(
+                    JSON.stringify({
+                        event: 'subscribe',
+                        data: {
+                            channel: 'candles',
+                            symbol: props.symbol,
+                        },
+                    }),
+                );
+            }
+
+            if (data.event === 'snapshot') {
+                candles.socketData = data.data
+                setCandles()
+            }
+
+            console.log(data);
+        };
+    };
+
 })
+
+const setCandles = () => {
+    candles.data.list = candles.socketData.data.map(item => [item.open, item.close, item.low, item.high])
+    candles.data.trend = candles.socketData.data.map(item => { return { value: [Utils.dateFormate(item.date, 'hhmm'), item.close] } })
+
+    let previousVol
+    candles.data.volume = candles.socketData.data.map((item, key) => {
+
+        let color = 1
+        if (previousVol) {
+            if (item.close > previousVol) {
+                color = 1
+            } else {
+                color = -1
+            }
+        }
+
+        previousVol = item.close
+
+        return [key, item.volume, color]
+    })
+
+    candles.data.category = candles.socketData.data.map(item => Utils.dateFormate(item.date, 'hhmm'))
+    candles.data.closePrice = candles.data.list[candles.data.list.length - 1][1]
+    candles.data.low = candles.data.list.reduce((prev, curr) => (prev[1] < curr[1] ? prev : curr))[2]
+    candles.data.high = candles.data.list.reduce((prev, curr) => (prev[1] > curr[1] ? prev : curr))[3]
+
+    setOption()
+}
 
 const setOption = () => {
     option.value = {

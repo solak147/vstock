@@ -14,41 +14,6 @@ import API from './apis'
 const indexStore = useIndexStore()
 
 onMounted(async () => {
-  const socket = new WebSocket('wss://api.fugle.tw/marketdata/v1.0/stock/streaming');
-
-  socket.onopen = () => {
-    socket.send(
-      JSON.stringify({
-        event: 'auth',
-        data: {
-          apikey: 'YzY2MTY5OWQtMWQ3OC00OTMzLThiZTYtYzViMDA2ZmIzZTg3IDA1ZjEzNDc3LTMzYjAtNDY0OC1hMjVmLWJjODgzNTBkNTRlZQ==',
-        },
-      }),
-    );
-
-    socket.onmessage = (message) => {
-      const data = JSON.parse(message.data);
-
-      if (data.event === 'authenticated') {
-        socket.send(
-          JSON.stringify({
-            event: 'subscribe',
-            data: {
-              channel: 'candles',
-              symbol: 'IX0001',
-            },
-          }),
-        );
-      }
-
-      if (data.event === 'snapshot') {
-        indexStore.candles.data = data.data
-      }
-
-      // console.log(data);
-    };
-  };
-
   //加權指數
   indexStore.info.data = await API.Stock.getStockInfo('IX0001')
 

@@ -2,12 +2,12 @@
     <div class="index">
         <div class="flex ml-10 bolder fz-18">
             <div>{{ indexStore.info.data.name }}</div>
-            <div :class="colorConfition" class="ml-10">{{ candles.data.closePrice }}</div>
-            <div :class="colorConfition" class="ml-10">{{ `${candles.data.priceUp > 0 ? '+' :
-                '-'}${candles.data.priceUp}`
+            <div :class="colorConfition" class="ml-10">{{ todayData.close }}</div>
+            <div :class="colorConfition" class="ml-10">{{ `${todayData.change > 0 ? '+' :
+                '-'}${todayData.change}`
                 }}</div>
-            <div :class="colorConfition" class="ml-10">{{ `${candles.data.priceUp > 0 ?
-                '+' : '-'}${candles.data.percent}%` }}</div>
+            <div :class="colorConfition" class="ml-10">{{ `${todayData.change_rate > 0 ?
+                '+' : '-'}${todayData.change_rate}%` }}</div>
         </div>
 
         <div class="flex justify-around flex-wrap">
@@ -22,7 +22,7 @@
                 </div>
 
                 <div>
-                    <RealTimeChart :candles="candles" :style="{ order: order[1] }" @reOrder="reOrder" class="mb-10">
+                    <RealTimeChart symbol="IX0001" :style="{ order: order[1] }" @reOrder="reOrder" class="mb-10">
                     </RealTimeChart>
 
                     <HistoryChart symbol="IX0001" :style="{ order: order[2] }" @reOrder="reOrder" class="mb-10">
@@ -53,129 +53,25 @@ import Utils from '@/utils'
 
 provide(THEME_KEY, 'dark')
 const indexStore = useIndexStore()
-
-const candles = reactive({
-    data: {
-        list: [],        //k棒
-        volume: [],     //量
-        trend: [],      //走勢   
-        category: [],
-        low: '',
-        high: '',
-        closePrice: '',  //收盤價
-        priceUp: '',     //上漲點數
-        percent: '',     //上漲幅度
-
-        width: '',
-        isBig: false,    //是否放大
-        currentSel: '走勢'   //目前圖表     
-    }
+let todayData = reactive({
+    close: 0,
+    change: 0,
+    change_rate: 0,
 })
 
 const colorConfition = computed(() => {
     return {
-        red: candles.data.closePrice > indexStore.info.data.previousClose,
-        green: candles.data.closePrice < indexStore.info.data.previousClose,
+        red: todayData.close > indexStore.info.data.previousClose,
+        green: todayData.close < indexStore.info.data.previousClose,
     }
 })
-
-watch(
-    () => indexStore.candles.data,
-    () => {
-        setCandles()
-        setInfo()
-    },
-    {
-        deep: true,
-    }
-)
 
 onMounted(async () => {
-    if (Object.keys(indexStore.candles.data).length === 0 || Object.keys(indexStore.info.data).length === 0) {
-        return
-    }
-
-    //即時走勢
-    setCandles()
-    setInfo()
-
-    //歷史走勢
-    // serHistoryCandles('1Y')
-
+    let yestodayIdx = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') == indexStore.info.data.date)
+    todayData.close = indexStore.tec5Years.data.day[yestodayIdx].close
+    todayData.change = indexStore.tec5Years.data.day[yestodayIdx].change
+    todayData.change_rate = indexStore.tec5Years.data.day[yestodayIdx].change_rate
 })
-
-const setInfo = () => {
-    candles.data.priceUp = (candles.data.closePrice - indexStore.info.data.previousClose).toFixed(2)
-    candles.data.percent = (candles.data.priceUp / indexStore.info.data.previousClose * 100).toFixed(2)
-}
-
-const setCandles = () => {
-    candles.data.list = indexStore.candles.data.data.map(item => [item.open, item.close, item.low, item.high])
-    candles.data.trend = indexStore.candles.data.data.map(item => { return { value: [Utils.dateFormate(item.date, 'hhmm'), item.close] } })
-
-    let previousVol
-    candles.data.volume = indexStore.candles.data.data.map((item, key) => {
-
-        let color = 1
-        if (previousVol) {
-            if (item.close > previousVol) {
-                color = 1
-            } else {
-                color = -1
-            }
-        }
-
-        previousVol = item.close
-
-        return [key, item.volume, color]
-    })
-
-    candles.data.category = indexStore.candles.data.data.map(item => Utils.dateFormate(item.date, 'hhmm'))
-    candles.data.closePrice = candles.data.list[candles.data.list.length - 1][1]
-    candles.data.low = candles.data.list.reduce((prev, curr) => (prev[1] < curr[1] ? prev : curr))[2]
-    candles.data.high = candles.data.list.reduce((prev, curr) => (prev[1] > curr[1] ? prev : curr))[3]
-}
-
-const serHistoryCandles = async (during) => {
-    let res
-    let nowDate = new Date()
-    let lastDate = new Date()
-
-    if (during == '1Y') {
-        lastDate.setFullYear(nowDate.getFullYear() - 1)
-        lastDate.setDate(lastDate.getDate() + 1)
-    } else if (during == '6M') {
-        lastDate.setMonth(nowDate.getMonth() - 6)
-        lastDate.setDate(lastDate.getDate() + 1)
-    } else if (during == '1M') {
-        lastDate.setMonth(nowDate.getMonth() - 1)
-        lastDate.setDate(lastDate.getDate() + 1)
-    }
-
-    res = await API.Stock.getStockHistory('IX0001', 'D', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-    candlesHistory.data.trend = res.data.map(item => { return { value: [item.date, item.close] } }).reverse()
-    candlesHistory.data.category = res.data.map(item => item.date).reverse()
-
-    nowDate = new Date()
-    lastDate = new Date()
-
-    //找上次平均收盤價,markLine顯示用
-    if (during == '1Y') {
-        lastDate.setFullYear(nowDate.getFullYear() - 1)
-        lastDate.setDate(lastDate.getDate() + 1)
-    } else if (during == '6M') {
-        lastDate.setMonth(nowDate.getMonth() - 6)
-        lastDate.setDate(lastDate.getDate() + 1)
-    } else if (during == '1M') {
-        lastDate.setMonth(nowDate.getMonth() - 1)
-        lastDate.setDate(lastDate.getDate() + 1)
-    }
-
-    res = await API.Stock.getStockHistory('IX0001', 'M', Utils.dateFormate(lastDate, 'yymmdd'), Utils.dateFormate(nowDate, 'yymmdd'))
-    candlesHistory.data.lastClose = res.data[0].close
-
-
-}
 
 const order = ref([1, 2, 3, 4, 5])
 const reOrder = (isBig, key) => {
