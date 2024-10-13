@@ -440,14 +440,14 @@ const setOption = () => {
                 ]
             },
         ],
-        legend: {
-            selected: {
-                '日': candles.data.currentSel == '日',
-            },
-            top: 10,
-            selectedMode: 'single',
-            data: ['日',],
-        },
+        // legend: {
+        //     selected: {
+        //         '日': candles.data.currentSel == '日',
+        //     },
+        //     top: 10,
+        //     selectedMode: 'single',
+        //     data: ['日',],
+        // },
 
         series: [
             {
@@ -1007,13 +1007,11 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     width: 60px;
 }
 
-:deep(.duringSel .el-select__wrapper) {
-    color: #fff !important;
+:deep(.el-select__wrapper) {
     background: transparent;
 }
 
-:deep(.kDuringSel .el-select__wrapper) {
-    color: #fff !important;
-    background: transparent;
+:deep(.el-select__placeholder, .el-select__caret) {
+    color: rgb(171, 169, 169);
 }
 </style>

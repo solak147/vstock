@@ -407,8 +407,12 @@ const legendselectchanged = (params) => {
     width: 60px;
 }
 
-:deep(.duringSel .el-select__wrapper) {
+:deep(.el-select__wrapper) {
     color: #fff;
     background: transparent;
+}
+
+:deep(.el-select__placeholder, .el-select__caret) {
+    color: rgb(171, 169, 169);
 }
 </style>

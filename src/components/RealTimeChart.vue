@@ -51,6 +51,7 @@ const downBorderColor = '#6fda1a';
 
 onMounted(() => {
     candles.data.width = chart.value.getWidth()
+    setOption()
 
     const socket = new WebSocket('wss://api.fugle.tw/marketdata/v1.0/stock/streaming');
 
