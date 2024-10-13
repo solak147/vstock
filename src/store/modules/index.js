@@ -13,14 +13,16 @@ export const useIndexStore = defineStore(
       //加權指數
       info.data = await API.Stock.getStockInfo('IX0001')
 
-      const today = Utils.dateFormate(new Date(), 'yymmdd')
+      const date = new Date()
+      const today = Utils.dateFormate(date, 'yymmdd')
 
       if (!tec5Years.data.day) {
         tec5Years.data = (await API.Stock.getFcnt('FCNT000099', 'IX0001')).data.content.rawContent
       } else {
         const tecDate = Utils.dateFormate(tec5Years.data.day[tec5Years.data.day.length - 1].date, 'yymmdd')
+        const dayOfWeek =  date.getDay() == 0 || date.getDay() == 6
 
-        if (today != tecDate) {
+        if (today != tecDate && !dayOfWeek) {
           tec5Years.data = (await API.Stock.getFcnt('FCNT000099', 'IX0001')).data.content.rawContent
         }
       }

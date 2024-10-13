@@ -27,6 +27,14 @@
             <div :style="`color:${ma10Color}`" class="w-80 text-left">RSI6：{{ rsiTxt.rsi6 }}</div>
             <div :style="`color:${ma20Color}`" class="w-100 text-left">RSI12：{{ rsiTxt.rsi12 }}</div>
         </div>
+
+        <el-select v-model="duringModel" placeholder="Select" size="small" class="duringSel" @change="setCandles">
+            <el-option v-for="item in duringOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+
+        <el-select v-model="kDuringModel" placeholder="Select" size="small" class="kDuringSel" @change="setCandles">
+            <el-option v-for="item in kDuringOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
     </div>
 </template>
 
@@ -93,19 +101,35 @@ const duringOptions = [
         label: '1Y',
     },
     {
-        value: '6M',
-        label: '6M',
+        value: '2Y',
+        label: '2Y',
     },
     {
-        value: '1M',
-        label: '1M',
+        value: '3Y',
+        label: '3Y',
+    },
+]
+
+const kDuringOptions = [
+    {
+        value: 'day',
+        label: '日',
+    },
+    {
+        value: 'week',
+        label: '周',
+    },
+    {
+        value: 'month',
+        label: '月',
     },
 ]
 
 const chart = ref()
 const option = ref()
 const loading = ref(false)
-const duringModel = ref('6M')
+const duringModel = ref('1Y')
+const kDuringModel = ref('day')
 const fiveYearClose = ref([])
 let candles = reactive({
     data: {
@@ -128,41 +152,33 @@ let candles = reactive({
 })
 
 onMounted(async () => {
-    loading.value = true
+    candles.data.width = chart.value.getWidth()
+
     setOption()
+
+    if (indexStore.tec5Years.data.day) {
+        setCandles()
+    }
 })
 
 const setCandles = async () => {
-    candles.data.width = chart.value.getWidth()
+    loading.value = true
 
     let delKey
     let startIdx
     let filterData
     let startDate = new Date()
 
-    // if (duringModel.value == '1Y') {
-    //     lastDate.setFullYear(nowDate.getFullYear() - 1)
-    //     lastDate.setDate(lastDate.getDate() + 1)
+    if (duringModel.value == '1Y') {
+        startDate.setFullYear(startDate.getFullYear() - 1)
+    } else if (duringModel.value == '2Y') {
+        startDate.setFullYear(startDate.getFullYear() - 2)
+    } else if (duringModel.value == '3Y') {
+        startDate.setFullYear(startDate.getFullYear() - 3)
+    }
 
-    //     maDate.setFullYear(nowDate.getFullYear() - 1)
-    //     maDate.setDate(maDate.getDate() - 120)
-    // } else if (duringModel.value == '6M') {
-    //     lastDate.setMonth(nowDate.getMonth() - 6)
-    //     lastDate.setDate(lastDate.getDate() + 1)
-
-    //     maDate.setMonth(nowDate.getMonth() - 6)
-    //     maDate.setDate(maDate.getDate() - 120)
-    // } else if (duringModel.value == '1M') {
-    //     lastDate.setMonth(nowDate.getMonth() - 1)
-    //     lastDate.setDate(lastDate.getDate() + 1)
-
-    //     maDate.setMonth(nowDate.getMonth() - 1)
-    //     maDate.setDate(maDate.getDate() - 120)
-    // }
-
-    startDate.setFullYear(startDate.getFullYear() - 1)
-    startIdx = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') > Utils.dateFormate(startDate, 'yymmdd'))
-    filterData = indexStore.tec5Years.data.day.slice(startIdx, indexStore.tec5Years.data.day.length)
+    startIdx = indexStore.tec5Years.data[kDuringModel.value].findIndex(item => Utils.dateFormate(item.date, 'yymmdd') > Utils.dateFormate(startDate, 'yymmdd'))
+    filterData = indexStore.tec5Years.data[kDuringModel.value].slice(startIdx, indexStore.tec5Years.data[kDuringModel.value].length)
 
     candles.data.list = filterData.map(item => [item.open, item.close, item.low, item.high, item.change])
     candles.data.category = filterData.map(item => Utils.dateFormate(item.date, 'yymmdd'))
@@ -179,8 +195,8 @@ const setCandles = async () => {
     candles.data.rsiData.rsi6 = filterData.map(item => item.eRsi6)
     candles.data.rsiData.rsi12 = filterData.map(item => item.eRsi12)
 
-    let currentIndex = indexStore.tec5Years.data.day.findIndex(item => Utils.dateFormate(item.date, 'yymmdd') == candles.data.category[0])
-    let previousVol = indexStore.tec5Years.data.day[currentIndex - 1].close
+    let currentIndex = indexStore.tec5Years.data[kDuringModel.value].findIndex(item => Utils.dateFormate(item.date, 'yymmdd') == candles.data.category[0])
+    let previousVol = indexStore.tec5Years.data[kDuringModel.value][currentIndex - 1].close
 
     candles.data.volume = filterData.map((item, key) => {
 
@@ -199,7 +215,7 @@ const setCandles = async () => {
     })
 
     let idx60 = Math.max(0, currentIndex - 60);
-    let resMa = indexStore.tec5Years.data.day.slice(idx60, currentIndex)
+    let resMa = indexStore.tec5Years.data[kDuringModel.value].slice(idx60, currentIndex)
     filterData.unshift(...resMa)
 
     candles.data.trend5 = filterData.map(item => item.close)
@@ -973,5 +989,31 @@ const setTooltipColor = (closePrice, lastClosePrice = 0) => {
     z-index: 1;
     top: 0;
     margin: 0;
+}
+
+.duringSel {
+    position: absolute;
+    z-index: 1;
+    right: 50px;
+    top: 10px;
+    width: 60px;
+}
+
+.kDuringSel {
+    position: absolute;
+    z-index: 1;
+    right: 120px;
+    top: 10px;
+    width: 60px;
+}
+
+:deep(.duringSel .el-select__wrapper) {
+    color: #fff !important;
+    background: transparent;
+}
+
+:deep(.kDuringSel .el-select__wrapper) {
+    color: #fff !important;
+    background: transparent;
 }
 </style>
